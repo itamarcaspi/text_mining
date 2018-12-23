@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Discussion</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Itamar Caspi" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
+    <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
+    <link rel="stylesheet" href="style\middlebury.css" type="text/css" />
+    <link rel="stylesheet" href="style\middlebury-fonts.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Discussion
+## Bank of Israel Research Seminar
+### Itamar Caspi
+### December 31, 2018 (updated: 2018-12-23)
+
+---
+
+
+
+
+
+---
+
+# My Take from this Paper
+
+- Great effort!
+
+- Important topic
+
+- Interesting insights
+
+
+
+---
+
+class: inverse, center, middle
+
+# Comments and Suggenstions
+
+---
+
+# Main Comments
+
+My main comments for the paper revolve around three topics:
+
+--
+
+- Improving the reproducability of the paper
+
+--
+
+- The need for better text preprocecing
+
+--
+
+- Fine tuning the topic analysis exercise
+
+---
+
+# Reproducability
+
+At current state, it is hard replicate the results in the paper since  
+
+--
+
+- Which packages where used other than **tm** and **tidytext**?  
+
+--
+
+- How was the data derived? Files? URLs? Where is it?  
+
+--
+
+- There is no code available to reproduce the figures in the paper  
+
+---
+
+# Which packages?
+
+Reproducing the results depends on installing and loading the necessary packages:
+
+
+```r
+library(tm)       # for cleaning and transforming text to data
+library(tidytext) # for working with tidy text objects
+library(tidyverse)  # for generating plots
+```
+ 
+
+
+For the purposes of this presentations, I will also use the **lubridate** package that handles date objects:
+
+
+```r
+library(lubridate)
+```
+
+
+---
+
+# Getting data from the web
+
+The data are the raw material for this document, yet the document does not make it clear how to get them. It might be helpful to show how we can download some text using the **rvest** package and convert it to text using the **pdftools** package:
+
+
+```r
+library(rvest)
+library(pdftools)
+
+pdf_urls &lt;- c("https://www.boi.org.il/en/NewsAndPublications/RegularPublications/Protocols/November%2026%202018%20minutes.pdf",
+         "https://www.boi.org.il/en/NewsAndPublications/RegularPublications/Protocols/October%208%202018%20minutes.pdf")
+
+minutes_url &lt;- pdf_urls %&gt;%
+    map_chr(~ pdf_text(.) %&gt;%
+              paste(collapse = " ") %&gt;% 
+              gsub(pattern = "\r\n", replacement = " ") %&gt;% 
+              tolower()
+            )
+```
+
+PROBLEM: Minute documents' links don't have a well defined url pattern. This makes it hard to loop over the entire archive.
+
+---
+# Get Data from Files
+
+Alternatively, users can pre-download the pdf files prior the analysis and convert them to text files using the ***pdftools** package.  
+
+First, make a list of the available files
+
+```r
+pdf_files &lt;- paste0("./documents/", list.files("./documents/"))
+```
+Next, convert the pdfs to text, clean some mess, and create a list of text files
+
+```r
+minutes_pdf &lt;- pdf_files %&gt;%
+    map_chr(~ pdf_text(.) %&gt;%
+              paste(collapse = " ") %&gt;% 
+              gsub(pattern = "\r\n", replacement = " ") %&gt;% 
+              tolower()
+            )
+```
+
+---
+
+# Get Document Dates
+
+The pdf files include information about their date of creation. We can use this to create a tibble with dates for every document
+ 
+
+```r
+dates &lt;- lapply(pdf_files, pdf_info)
+dates &lt;- lapply(dates, `[[`, "created")
+dates &lt;- do.call("c", dates)
+dates &lt;- ymd_hms(dates)
+
+dates_df &lt;- tibble(document = as.character(1:length(dates)),
+                   date     = sort(dates))
+
+head(dates_df,3)
+```
+
+```
+## # A tibble: 3 x 2
+##   document date               
+##   &lt;chr&gt;    &lt;dttm&gt;             
+## 1 1        2016-01-11 08:12:12
+## 2 2        2016-02-08 09:22:13
+## 3 3        2016-03-07 11:44:04
+```
+
+
+---
+
+# Focus on What's Important
+
+The important part of the minutes is "narrow-forum" discussion. The following loop cuts all of the text that is not included in the "narrow-forum" discussion
+
+```r
+for (i in 1:length(minutes_pdf)) {
+  narrow_start &lt;- str_locate(minutes_pdf[i],
+                             "the narrow-forum discussion")[1,1][[1]]
+  narrow_end   &lt;- str_locate(minutes_pdf[i],
+                             "participants in the narrow-forum discussion")[1,1][[1]] - 1
+  minutes_pdf[i] &lt;- str_sub(minutes_pdf[i], narrow_start, narrow_end)
+}
+```
+We can check that none of the list's elements is empty by sorting them out and examining their length:
+
+```r
+minutes_pdf %&gt;%
+  map_chr(str_length) %&gt;%
+  as.numeric() %&gt;%
+  as_tibble() %&gt;%
+  arrange(value) %&gt;% 
+  head(3)
+```
+
+```
+## # A tibble: 3 x 1
+##   value
+##   &lt;dbl&gt;
+## 1  4166
+## 2  5015
+## 3  5145
+```
+
+---
+
+# Cleaning the text
+
+The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc.
+
+
+```r
+minutes_corpus &lt;- Corpus(VectorSource(minutes_pdf))
+
+minutes_corpus &lt;- tm_map(minutes_corpus, removeWords, stopwords("english"))
+minutes_corpus &lt;- tm_map(minutes_corpus, removeNumbers)
+minutes_corpus &lt;- tm_map(minutes_corpus, removePunctuation)
+minutes_corpus &lt;- tm_map(minutes_corpus, stripWhitespace)
+minutes_corpus &lt;- tm_map(minutes_corpus, stemDocument)
+```
+Now we convert the list to a term ducument matrix 
+
+```r
+minutes_dtm &lt;- TermDocumentMatrix(minutes_corpus)
+
+minutes_dtm
+```
+
+```
+## &lt;&lt;TermDocumentMatrix (terms: 1073, documents: 29)&gt;&gt;
+## Non-/sparse entries: 7780/23337
+## Sparsity           : 75%
+## Maximal term length: 17
+## Weighting          : term frequency (tf)
+```
+
+---
+
+# Working with Tidy Text
+
+- In a tidy data set each variable is a column, each observation is a row, and each type of observational unit is an entry in the table.
+- We can tidy the text using the `tidy()` function from the **tidytext** package.  
+- Once the test is tidy we can easily use our dates tibble to add a date column with the date of each minutes  
+
+
+```r
+tidy_minutes &lt;- tidy(minutes_dtm) %&gt;% 
+  rename(word = term) %&gt;% 
+  left_join(dates_df)
+
+head(tidy_minutes)
+```
+
+```
+## # A tibble: 6 x 4
+##   word     document count date               
+##   &lt;chr&gt;    &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;             
+## 1 acceler  1            1 2016-01-11 08:12:12
+## 2 accommod 1            6 2016-01-11 08:12:12
+## 3 account  1            1 2016-01-11 08:12:12
+## 4 accumul  1            1 2016-01-11 08:12:12
+## 5 achiev   1            2 2016-01-11 08:12:12
+## 6 activ    1            8 2016-01-11 08:12:12
+```
+
+---
+
+# Examining the Data
+
+Now, that the text is tidy, we can easily spot the 10 words that appear most frequently
+
+
+```r
+tidy_minutes_head &lt;- tidy_minutes %&gt;%
+  group_by(word) %&gt;% 
+  summarise(count_sum = sum(count)) %&gt;% 
+  arrange(desc(count_sum)) %&gt;% 
+  head(10)
+
+tidy_minutes_head
+```
+
+```
+## # A tibble: 10 x 2
+##    word     count_sum
+##    &lt;chr&gt;        &lt;dbl&gt;
+##  1 rate           776
+##  2 committe       553
+##  3 inflat         477
+##  4 member         447
+##  5 increas        400
+##  6 continu        360
+##  7 discuss        344
+##  8 interest       336
+##  9 growth         293
+## 10 market         254
+```
+
+---
+
+# Sentiment Analysis
+
+The [Loughran and McDonald sentiment lexicon](https://sraf.nd.edu/textual-analysis/resources/) is induced in the __tidytext__ package
+
+
+```r
+get_sentiments("loughran") %&gt;%
+    count(sentiment, sort = TRUE)
+```
+
+```
+## # A tibble: 6 x 2
+##   sentiment        n
+##   &lt;chr&gt;        &lt;int&gt;
+## 1 negative      2355
+## 2 litigious      903
+## 3 positive       354
+## 4 uncertainty    297
+## 5 constraining   184
+## 6 superfluous     56
+```
+
+
+
+```r
+minutes_sentiment &lt;- tidy_minutes %&gt;%
+  mutate(year_pub = as.integer(year(date))) %&gt;% 
+  add_count(date) %&gt;%
+  rename(minutes_total = n) %&gt;% 
+  inner_join(get_sentiments("loughran"))
+
+head(minutes_sentiment)
+```
+
+```
+## # A tibble: 6 x 7
+##   word  document count date                year_pub minutes_total sentiment
+##   &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;                 &lt;int&gt;         &lt;int&gt; &lt;chr&gt;    
+## 1 atta~ 1            1 2016-01-11 08:12:12     2016           292 positive 
+## 2 bound 1            3 2016-01-11 08:12:12     2016           292 constrai~
+## 3 may   1            2 2016-01-11 08:12:12     2016           292 uncertai~
+## 4 prev~ 1            1 2016-01-11 08:12:12     2016           292 constrai~
+## 5 prol~ 1            1 2016-01-11 08:12:12     2016           292 negative 
+## 6 refe~ 1            1 2016-01-11 08:12:12     2016           292 litigious
+```
+
+---
+
+# Sentiment analysis of BoI Minutes
+## Using the Loughran-McDonald lexicon
+
+
+```r
+minutes_sentiment %&gt;%
+    count(date, minutes_total, sentiment) %&gt;%
+    filter(sentiment %in% c("positive", "negative", 
+                            "uncertainty")) %&gt;%
+    mutate(sentiment = factor(sentiment, levels = c("negative",
+                                                    "positive",
+                                                    "uncertainty")
+                                                    )) %&gt;%
+    ggplot(aes(date, n / minutes_total, color = sentiment)) +
+    geom_line() +
+    labs(y = "Relative frequency", x = NULL)
+```
+
+![](index_files/figure-html/unnamed-chunk-16-1..svg)&lt;!-- --&gt;
+
+---
+
+# Topic Modeling
+
+
+```r
+library(quanteda)
+library(stm)
+
+minutes_dfm &lt;- tidy_minutes %&gt;%
+    count(document, word, sort = TRUE) %&gt;%
+    cast_dfm(document, word, n)
+```
+
+
+
+```r
+topic_model &lt;- stm(minutes_dfm, K = 6, 
+                   verbose = FALSE, init.type = "Spectral")
+```
+
+---
+# Highest word probabilities for each topic
+
+&lt;img src="index_files/figure-html/unnamed-chunk-19-1..svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Distribution of minutes probabilities for each topic
+
+&lt;img src="index_files/figure-html/unnamed-chunk-20-1..svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: inverse, center, middle
+
+# Conclusions
+
+---
+
+class: inverse, center, middle
+
+# Thanks!
+
+Comments?
+
+[&lt;i class="fa fa-envelope"&gt;&lt;/i&gt; ](mailto:caspi.itamar@gmail.com) caspi.itamar@gmail.com \|
+[&lt;i class="fa fa-github"&gt;&lt;/i&gt; ](https://github.com/itamarcaspi/) github.com/itamarcaspi
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"slideNumberFormat": "<div class=\"progress-bar-container\">   <div class=\"progress-bar\" style=\"width: calc(%current% / %total% * 100%);\">   </div> </div> "
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
