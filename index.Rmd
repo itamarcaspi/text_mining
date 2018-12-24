@@ -5,7 +5,7 @@ author: "Itamar Caspi"
 date: "December 30, 2018 (updated: `r Sys.Date()`)"
 output:
   xaringan::moon_reader:
-    css: [default, "style/middlebury.css", "style/middlebury-fonts.css"]
+    css: [default, "style/rutgers.css", "style/rutgers-fonts.css"]
     lib_dir: libs
     nature:
       highlightStyle: github
@@ -21,6 +21,7 @@ output:
 
 ```{r setup, include=FALSE}
 library(svglite)
+library(knitr)
 knitr::opts_chunk$set(eval = TRUE, 
                       echo = TRUE,
                       warning = FALSE,
@@ -43,7 +44,7 @@ htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 
 ---
 
-# My Take from this Paper
+# My Take From This Paper
 
 - A great pedagogical service to the research department
 
@@ -76,7 +77,7 @@ class: inverse, center, middle
 
 ---
 
-# Issues with reproducability
+# Issues with Reproducability
 
 At current state, it is hard replicate the results in the paper since  
 
@@ -94,7 +95,7 @@ At current state, it is hard replicate the results in the paper since
 
 ---
 
-# Which packages?
+# Which Packages?
 
 Reproducing the results depends on installing and loading the following packages:
 
@@ -112,7 +113,7 @@ theme_set(theme_light())  # set default theme for all plots
 
 ---
 
-# Getting data from the web
+# Getting Data from the Web
 
 The data are the raw material for this document, yet the document does not make it clear how to get them. It might be helpful to show how we can download some text using the **rvest** package and convert it to text using the **pdftools** package:
 
@@ -184,7 +185,7 @@ minutes_dates <- pdf_files %>%
   rename(date = value) %>% 
   mutate(document = as.character(1:n()))
 
-head(minutes_dates)
+head(minutes_dates, 3)
 
 ```
 
@@ -228,7 +229,7 @@ minutes_pdf %>%
 
 ---
 
-# Cleaning the text
+# Cleaning the Text
 
 The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc.
 
@@ -267,7 +268,7 @@ head(tidy_minutes)
 
 ---
 
-# Which words actually matter?
+# Which Words Actually Matter?
 
 Now, that the text is tidy, we can easily spot the most frequent words
 
@@ -313,7 +314,7 @@ head(minutes_sentiment)
 
 ---
 
-# Sentiment analysis of BoI Minutes
+# Sentiment Analysis of BoI Minutes
 ## _Within_ Relative Frequency is More Informative
 
 ```{r echo = FALSE, fig.width=10, fig.height=6, fig.align='center'}
@@ -334,11 +335,9 @@ minutes_sentiment %>%
 
 ---
 
-# Topic Modeling
+# "Unsupervised" Topic Modeling
 
-- At its core, topic modelling is an unsupervised learning exercise.  
-
-- This leaves lots of room for discretion and interpretation.  
+At its core, topic modelling is an unsupervised learning exercise. This leaves plenty of room for discretion and interpretation.  
 
 Here is how its done:
 
@@ -351,14 +350,16 @@ minutes_dfm <- tidy_minutes %>%
     count(document, word, sort = TRUE) %>%
     cast_dfm(document, word, n)
 
-topic_model <- stm(minutes_dfm, K = 6, 
-                   verbose = FALSE, init.type = "Spectral")
+topic_model <- stm(minutes_dfm, K = 6, #<<
+                 verbose = FALSE, init.type = "Spectral") #<<
 
 ```
 
+From the __stm__ manual:  
+<ru-blockquote>"The most important user input in parametric topic models is the number of topics. There is no right answer to the appropriate number of topics. More topics will give more fine-grained representations of the data at the potential cost of being less precisely estimated."</ru-blockquote>
 
 ---
-# Which Words Contribute Most for Each Topic?
+# Which Words Contribute Most to  Each Topic?
 
 ```{r echo=FALSE, fig.width=10, fig.height=6, fig.align='center'}
 # devtools::install_github('dgrtwo/drlib')
@@ -368,7 +369,7 @@ td_beta <- tidy(topic_model)
 
 td_beta %>%
     group_by(topic) %>%
-    top_n(10, beta) %>%
+    top_n(8, beta) %>%
     ungroup() %>%
     mutate(topic = paste0("Topic ", topic),
            term = reorder_within(term, beta, topic)) %>%

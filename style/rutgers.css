@@ -114,7 +114,6 @@ thead, tfoot, tr:nth-child(even) { background: none; }
 
 /* Add image and change bg color */
 .title-slide {
-  background-image: url(https://github.com/jvcasillas/ru_xaringan/raw/master/img/logo/ru_shield.png);
   background-position: 9% 15%;
   background-size: 55px;
   background-color: #fff;
