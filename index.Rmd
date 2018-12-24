@@ -1,6 +1,6 @@
 ---
 title: "Discussion of \"Text Mining Methodologies with R\""
-subtitle: "Bank of Israel Research Seminar"
+subtitle: "By Benchimol, Kazinnik, and Saadon"
 author: "Itamar Caspi"
 date: "December 30, 2018 (updated: `r Sys.Date()`)"
 output:
