@@ -207,6 +207,10 @@ for (i in 1:length(minutes_pdf)) {
 }
 ```
 
+---
+
+# Focus on What's Important
+
 We can check that none of the list's elements is empty by sorting them out and examining their length:
 
 ```{r}
@@ -215,7 +219,7 @@ minutes_pdf %>%
   as.numeric() %>%
   as_tibble() %>%
   arrange(value) %>% 
-  head(3)
+  head()
 ```
 
 ---
@@ -285,6 +289,11 @@ get_sentiments("loughran") %>%
     count(sentiment, sort = TRUE)
 ```
 
+---
+
+# Sentiment Analysis
+
+Here is how we can apply the Loughran and McDonald sentiment analysis the "tidy" way
 
 ```{r }
 
