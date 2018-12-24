@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Discussion</title>
+    <title>Discussion of “Text Mining Methodologies with R”</title>
     <meta charset="utf-8">
     <meta name="author" content="Itamar Caspi" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
@@ -14,56 +14,63 @@
     <textarea id="source">
 class: center, middle, inverse, title-slide
 
-# Discussion
+# Discussion of “Text Mining Methodologies with R”
 ## Bank of Israel Research Seminar
 ### Itamar Caspi
-### December 31, 2018 (updated: 2018-12-23)
+### December 31, 2018 (updated: 2018-12-24)
 
 ---
 
 
 
+
+---
+
+# What This Paper Does
+
+- Reviews several existing methodologies in text analysis  
+
+- Illustrates using R
+
+- Presents potential applications related to central banking
 
 
 ---
 
 # My Take from this Paper
 
-- Great effort!
+- A great pedagogical service to the research department
 
-- Important topic
+- Brings attention to an important and relatively new tool
 
-- Interesting insights
+- Presents interesting, though preliminary, insights
 
 
+---
+
+# My Comments and Suggestions
+
+
+- Need to improve the reproducibility of the paper
+
+--
+
+- Devote more care to the text preprocessing stage
+
+--
+
+- Increase transparency of the topic analysis exercise
 
 ---
 
 class: inverse, center, middle
 
-# Comments and Suggenstions
+# Reproducable research:
+## Results are accompanoied with the data and code used to produce them
 
 ---
 
-# Main Comments
-
-My main comments for the paper revolve around three topics:
-
---
-
-- Improving the reproducability of the paper
-
---
-
-- The need for better text preprocecing
-
---
-
-- Fine tuning the topic analysis exercise
-
----
-
-# Reproducability
+# Issues with reproducability
 
 At current state, it is hard replicate the results in the paper since  
 
@@ -73,7 +80,7 @@ At current state, it is hard replicate the results in the paper since
 
 --
 
-- How was the data derived? Files? URLs? Where is it?  
+- How was the data derived? Files? URLs? Where can we find it?
 
 --
 
@@ -83,23 +90,15 @@ At current state, it is hard replicate the results in the paper since
 
 # Which packages?
 
-Reproducing the results depends on installing and loading the necessary packages:
+Reproducing the results depends on installing and loading the following packages:
 
 
 ```r
 library(tm)       # for cleaning and transforming text to data
 library(tidytext) # for working with tidy text objects
-library(tidyverse)  # for generating plots
+library(tidyverse)  # for data wrangling and generating plots
 ```
  
-
-
-For the purposes of this presentations, I will also use the **lubridate** package that handles date objects:
-
-
-```r
-library(lubridate)
-```
 
 
 ---
@@ -124,19 +123,19 @@ minutes_url &lt;- pdf_urls %&gt;%
             )
 ```
 
-PROBLEM: Minute documents' links don't have a well defined url pattern. This makes it hard to loop over the entire archive.
+PROBLEM: Minute documents' links don't have a well defined URL pattern. This makes it hard to loop over the entire archive.
 
 ---
 # Get Data from Files
 
-Alternatively, users can pre-download the pdf files prior the analysis and convert them to text files using the ***pdftools** package.  
+Alternatively, users can pre-download the PDF files prior the analysis and convert them to text files using the ***pdftools** package.  
 
 First, make a list of the available files
 
 ```r
 pdf_files &lt;- paste0("./documents/", list.files("./documents/"))
 ```
-Next, convert the pdfs to text, clean some mess, and create a list of text files
+Next, convert the PDFs to text, clean some mess, and create a list of text files
 
 ```r
 minutes_pdf &lt;- pdf_files %&gt;%
@@ -151,36 +150,52 @@ minutes_pdf &lt;- pdf_files %&gt;%
 
 # Get Document Dates
 
-The pdf files include information about their date of creation. We can use this to create a tibble with dates for every document
+First, we need to load the **lubridate** package that handles date objects:
+
+
+```r
+library(lubridate)
+```
+
+The PDF files include information about their date of creation. We can use this to create a tibble with dates for every document
  
 
 ```r
 dates &lt;- lapply(pdf_files, pdf_info)
 dates &lt;- lapply(dates, `[[`, "created")
 dates &lt;- do.call("c", dates)
-dates &lt;- ymd_hms(dates)
+dates &lt;- ymd_hms(dates)  # from lubridate
 
 dates_df &lt;- tibble(document = as.character(1:length(dates)),
                    date     = sort(dates))
 
-head(dates_df,3)
+head(dates_df,5)
 ```
 
 ```
-## # A tibble: 3 x 2
+## # A tibble: 5 x 2
 ##   document date               
 ##   &lt;chr&gt;    &lt;dttm&gt;             
 ## 1 1        2016-01-11 08:12:12
 ## 2 2        2016-02-08 09:22:13
 ## 3 3        2016-03-07 11:44:04
+## 4 4        2016-04-11 09:17:34
+## 5 5        2016-05-05 13:33:54
 ```
 
+---
+
+class: inverse, center, middle
+
+# Preprocessing: 
+## Avoiding "garbage in, garbage out"
 
 ---
 
 # Focus on What's Important
 
 The important part of the minutes is "narrow-forum" discussion. The following loop cuts all of the text that is not included in the "narrow-forum" discussion
+
 
 ```r
 for (i in 1:length(minutes_pdf)) {
@@ -191,7 +206,9 @@ for (i in 1:length(minutes_pdf)) {
   minutes_pdf[i] &lt;- str_sub(minutes_pdf[i], narrow_start, narrow_end)
 }
 ```
+
 We can check that none of the list's elements is empty by sorting them out and examining their length:
+
 
 ```r
 minutes_pdf %&gt;%
@@ -227,7 +244,7 @@ minutes_corpus &lt;- tm_map(minutes_corpus, removePunctuation)
 minutes_corpus &lt;- tm_map(minutes_corpus, stripWhitespace)
 minutes_corpus &lt;- tm_map(minutes_corpus, stemDocument)
 ```
-Now we convert the list to a term ducument matrix 
+Now we convert the list to a term document matrix 
 
 ```r
 minutes_dtm &lt;- TermDocumentMatrix(minutes_corpus)
@@ -274,9 +291,9 @@ head(tidy_minutes)
 
 ---
 
-# Examining the Data
+# Which words actually matter?
 
-Now, that the text is tidy, we can easily spot the 10 words that appear most frequently
+Now, that the text is tidy, we can easily spot the most frequent words
 
 
 ```r
@@ -284,25 +301,21 @@ tidy_minutes_head &lt;- tidy_minutes %&gt;%
   group_by(word) %&gt;% 
   summarise(count_sum = sum(count)) %&gt;% 
   arrange(desc(count_sum)) %&gt;% 
-  head(10)
+  head()
 
 tidy_minutes_head
 ```
 
 ```
-## # A tibble: 10 x 2
-##    word     count_sum
-##    &lt;chr&gt;        &lt;dbl&gt;
-##  1 rate           776
-##  2 committe       553
-##  3 inflat         477
-##  4 member         447
-##  5 increas        400
-##  6 continu        360
-##  7 discuss        344
-##  8 interest       336
-##  9 growth         293
-## 10 market         254
+## # A tibble: 6 x 2
+##   word     count_sum
+##   &lt;chr&gt;        &lt;dbl&gt;
+## 1 rate           776
+## 2 committe       553
+## 3 inflat         477
+## 4 member         447
+## 5 increas        400
+## 6 continu        360
 ```
 
 ---
@@ -356,28 +369,19 @@ head(minutes_sentiment)
 ---
 
 # Sentiment analysis of BoI Minutes
-## Using the Loughran-McDonald lexicon
+## _Relative_ Frequency is More Informative
 
-
-```r
-minutes_sentiment %&gt;%
-    count(date, minutes_total, sentiment) %&gt;%
-    filter(sentiment %in% c("positive", "negative", 
-                            "uncertainty")) %&gt;%
-    mutate(sentiment = factor(sentiment, levels = c("negative",
-                                                    "positive",
-                                                    "uncertainty")
-                                                    )) %&gt;%
-    ggplot(aes(date, n / minutes_total, color = sentiment)) +
-    geom_line() +
-    labs(y = "Relative frequency", x = NULL)
-```
-
-![](index_files/figure-html/unnamed-chunk-16-1..svg)&lt;!-- --&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-16-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
 # Topic Modeling
+
+- At its core, topic modelling is an unsupervised learning exercise.  
+
+- This leaves lots of room for discretion and interpretation.  
+
+Here is how its done:
 
 
 ```r
@@ -387,25 +391,22 @@ library(stm)
 minutes_dfm &lt;- tidy_minutes %&gt;%
     count(document, word, sort = TRUE) %&gt;%
     cast_dfm(document, word, n)
-```
 
-
-
-```r
 topic_model &lt;- stm(minutes_dfm, K = 6, 
                    verbose = FALSE, init.type = "Spectral")
 ```
 
+
 ---
-# Highest word probabilities for each topic
+# Which Words Contribute Most for Each Topic?
+
+&lt;img src="index_files/figure-html/unnamed-chunk-18-1..svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+# The Distrubution of Topics Across Documents
 
 &lt;img src="index_files/figure-html/unnamed-chunk-19-1..svg" style="display: block; margin: auto;" /&gt;
-
----
-
-# Distribution of minutes probabilities for each topic
-
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
