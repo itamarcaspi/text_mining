@@ -32,8 +32,6 @@ options(htmltools.dir.version = FALSE)
 htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 ```
 
----
-
 # What This Paper Does
 
 - Reviews several existing methodologies in text analysis  
@@ -118,9 +116,12 @@ theme_set(theme_light())  # set default theme for all plots
 
 The data are the raw material for this document, yet the document does not make it clear how to get them. It might be helpful to show how we can download some text using the **rvest** package and convert it to text using the **pdftools** package:
 
-```{r eval=TRUE}
+```{r}
 library(rvest)
 library(pdftools)
+```
+ 
+```{r eval=FALSE}
 
 pdf_urls <- c("https://www.boi.org.il/en/NewsAndPublications/RegularPublications/Protocols/November%2026%202018%20minutes.pdf",
          "https://www.boi.org.il/en/NewsAndPublications/RegularPublications/Protocols/October%208%202018%20minutes.pdf")
@@ -146,7 +147,9 @@ First, make a list of the available files
 pdf_files <- paste0("./documents/", list.files("./documents/"))
 
 ```
+
 Next, convert the PDFs to text, clean some mess, and create a list of text files
+
 ```{r}
 minutes_pdf <- pdf_files %>%
     map_chr(~ pdf_text(.) %>%
@@ -179,7 +182,6 @@ minutes_dates <- pdf_files %>%
   do.call("c", .) %>% 
   as.tibble() %>% 
   rename(date = value) %>% 
-  arrange(date) %>% 
   mutate(document = as.character(1:n()))
 
 head(minutes_dates)
