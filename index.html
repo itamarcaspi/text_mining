@@ -161,26 +161,28 @@ The PDF files include information about their date of creation. We can use this 
  
 
 ```r
-dates &lt;- lapply(pdf_files, pdf_info)
-dates &lt;- lapply(dates, `[[`, "created")
-dates &lt;- do.call("c", dates)
-dates &lt;- ymd_hms(dates)  # from lubridate
+minutes_dates &lt;- pdf_files %&gt;% 
+  map(pdf_info) %&gt;% 
+  map("created") %&gt;% 
+  do.call("c", .) %&gt;% 
+  as.tibble() %&gt;% 
+  rename(date = value) %&gt;% 
+  arrange(date) %&gt;% 
+  mutate(document = as.character(1:n()))
 
-dates_df &lt;- tibble(document = as.character(1:length(dates)),
-                   date     = sort(dates))
-
-head(dates_df,5)
+head(minutes_dates)
 ```
 
 ```
-## # A tibble: 5 x 2
-##   document date               
-##   &lt;chr&gt;    &lt;dttm&gt;             
-## 1 1        2016-01-11 08:12:12
-## 2 2        2016-02-08 09:22:13
-## 3 3        2016-03-07 11:44:04
-## 4 4        2016-04-11 09:17:34
-## 5 5        2016-05-05 13:33:54
+## # A tibble: 6 x 2
+##   date                document
+##   &lt;dttm&gt;              &lt;chr&gt;   
+## 1 2016-01-11 08:12:12 1       
+## 2 2016-02-08 09:22:13 2       
+## 3 2016-03-07 11:44:04 3       
+## 4 2016-04-11 09:17:34 4       
+## 5 2016-05-05 13:33:54 5       
+## 6 2016-06-06 09:56:59 6
 ```
 
 ---
@@ -279,7 +281,7 @@ minutes_dtm
 ```r
 tidy_minutes &lt;- tidy(minutes_dtm) %&gt;% 
   rename(word = term) %&gt;% 
-  left_join(dates_df)
+  left_join(minutes_dates)
 
 head(tidy_minutes)
 ```

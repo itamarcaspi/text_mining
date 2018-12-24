@@ -173,15 +173,17 @@ The PDF files include information about their date of creation. We can use this 
  
 ```{r}
 
-dates <- lapply(pdf_files, pdf_info)
-dates <- lapply(dates, `[[`, "created")
-dates <- do.call("c", dates)
-dates <- ymd_hms(dates)  # from lubridate
+minutes_dates <- pdf_files %>% 
+  map(pdf_info) %>% 
+  map("created") %>% 
+  do.call("c", .) %>% 
+  as.tibble() %>% 
+  rename(date = value) %>% 
+  arrange(date) %>% 
+  mutate(document = as.character(1:n()))
 
-dates_df <- tibble(document = as.character(1:length(dates)),
-                   date     = sort(dates))
+head(minutes_dates)
 
-head(dates_df,5)
 ```
 
 ---
@@ -256,7 +258,7 @@ minutes_dtm
 ```{r}
 tidy_minutes <- tidy(minutes_dtm) %>% 
   rename(word = term) %>% 
-  left_join(dates_df)
+  left_join(minutes_dates)
 
 head(tidy_minutes)
 ```
