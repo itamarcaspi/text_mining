@@ -179,12 +179,12 @@ head(minutes_dates)
 ## # A tibble: 6 x 2
 ##   date                document
 ##   &lt;dttm&gt;              &lt;chr&gt;   
-## 1 2016-08-08 10:20:14 1       
-## 2 2016-04-11 09:17:34 2       
-## 3 2016-02-08 09:22:13 3       
-## 4 2016-01-11 08:12:12 4       
-## 5 2016-06-06 09:56:59 5       
-## 6 2016-03-07 11:44:04 6
+## 1 2015-04-05 11:57:26 1       
+## 2 2015-08-10 11:34:15 2       
+## 3 2016-08-08 10:20:14 3       
+## 4 2016-04-11 09:17:34 4       
+## 5 2015-12-07 09:00:52 5       
+## 6 2016-02-08 09:22:13 6
 ```
 
 ---
@@ -231,12 +231,12 @@ minutes_pdf %&gt;%
 ## # A tibble: 6 x 1
 ##   value
 ##   &lt;dbl&gt;
-## 1  4166
-## 2  5015
-## 3  5145
-## 4  5407
-## 5  5758
-## 6  5968
+## 1     0
+## 2  4166
+## 3  5015
+## 4  5145
+## 5  5407
+## 6  5758
 ```
 
 ---
@@ -264,9 +264,9 @@ minutes_dtm
 ```
 
 ```
-## &lt;&lt;TermDocumentMatrix (terms: 1073, documents: 29)&gt;&gt;
-## Non-/sparse entries: 7780/23337
-## Sparsity           : 75%
+## &lt;&lt;TermDocumentMatrix (terms: 1188, documents: 41)&gt;&gt;
+## Non-/sparse entries: 10774/37934
+## Sparsity           : 78%
 ## Maximal term length: 17
 ## Weighting          : term frequency (tf)
 ```
@@ -292,12 +292,12 @@ head(tidy_minutes)
 ## # A tibble: 6 x 4
 ##   word     document count date               
 ##   &lt;chr&gt;    &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;             
-## 1 acceler  1            1 2016-08-08 10:20:14
-## 2 accommod 1            6 2016-08-08 10:20:14
-## 3 account  1            1 2016-08-08 10:20:14
-## 4 accumul  1            1 2016-08-08 10:20:14
-## 5 achiev   1            2 2016-08-08 10:20:14
-## 6 activ    1            8 2016-08-08 10:20:14
+## 1 absent   1            1 2015-04-05 11:57:26
+## 2 accommod 1            1 2015-04-05 11:57:26
+## 3 accord   1            1 2015-04-05 11:57:26
+## 4 achiev   1            1 2015-04-05 11:57:26
+## 5 activ    1            7 2015-04-05 11:57:26
+## 6 addit    1            2 2015-04-05 11:57:26
 ```
 
 ---
@@ -321,12 +321,12 @@ tidy_minutes_head
 ## # A tibble: 6 x 2
 ##   word     count_sum
 ##   &lt;chr&gt;        &lt;dbl&gt;
-## 1 rate           776
-## 2 committe       553
-## 3 inflat         477
-## 4 member         447
-## 5 increas        400
-## 6 continu        360
+## 1 rate          1099
+## 2 committe       701
+## 3 inflat         635
+## 4 member         578
+## 5 increas        513
+## 6 continu        482
 ```
 
 ---
@@ -374,12 +374,12 @@ head(minutes_sentiment)
 ## # A tibble: 6 x 7
 ##   word  document count date                year_pub minutes_total sentiment
 ##   &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;                 &lt;int&gt;         &lt;int&gt; &lt;chr&gt;    
-## 1 atta~ 1            1 2016-08-08 10:20:14     2016           292 positive 
-## 2 bound 1            3 2016-08-08 10:20:14     2016           292 constrai~
-## 3 may   1            2 2016-08-08 10:20:14     2016           292 uncertai~
-## 4 prev~ 1            1 2016-08-08 10:20:14     2016           292 constrai~
-## 5 prol~ 1            1 2016-08-08 10:20:14     2016           292 negative 
-## 6 refe~ 1            1 2016-08-08 10:20:14     2016           292 litigious
+## 1 bound 1            2 2015-04-05 11:57:26     2015           248 constrai~
+## 2 depe~ 1            1 2015-04-05 11:57:26     2015           248 uncertai~
+## 3 depe~ 1            1 2015-04-05 11:57:26     2015           248 constrai~
+## 4 down~ 1            1 2015-04-05 11:57:26     2015           248 negative 
+## 5 halt  1            1 2015-04-05 11:57:26     2015           248 negative 
+## 6 pers~ 1            1 2015-04-05 11:57:26     2015           248 negative
 ```
 
 ---
