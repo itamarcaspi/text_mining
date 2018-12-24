@@ -2,7 +2,7 @@
 title: "Discussion of \"Text Mining Methodologies with R\""
 subtitle: "Bank of Israel Research Seminar"
 author: "Itamar Caspi"
-date: "December 31, 2018 (updated: `r Sys.Date()`)"
+date: "December 30, 2018 (updated: `r Sys.Date()`)"
 output:
   xaringan::moon_reader:
     css: [default, "style/middlebury.css", "style/middlebury-fonts.css"]
@@ -310,7 +310,7 @@ head(minutes_sentiment)
 ---
 
 # Sentiment analysis of BoI Minutes
-## _Relative_ Frequency is More Informative
+## _Within_ Relative Frequency is More Informative
 
 ```{r echo = FALSE, fig.width=10, fig.height=6, fig.align='center'}
 
