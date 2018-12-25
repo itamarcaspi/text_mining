@@ -417,7 +417,7 @@ class: inverse, center, middle
 
 - Avoid using word clouds  
 
-- Check robustness to `stemDociment`
+- Check robustness w.r.t `stemDociment`
 
 ---
 
