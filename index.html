@@ -17,7 +17,7 @@ class: center, middle, inverse, title-slide
 # Discussion of “Text Mining Methodologies with R”
 ## By Benchimol, Kazinnik, and Saadon
 ### Itamar Caspi
-### December 30, 2018 (updated: 2018-12-24)
+### December 30, 2018 (updated: 2018-12-25)
 
 ---
 
@@ -244,27 +244,29 @@ The **tm** package enables us to "clean" the text - transform to lowercase lette
 
 
 ```r
-minutes_corpus &lt;- Corpus(VectorSource(minutes_pdf))
-
-minutes_corpus &lt;- tm_map(minutes_corpus, removeWords, stopwords("english"))
-minutes_corpus &lt;- tm_map(minutes_corpus, removeNumbers)
-minutes_corpus &lt;- tm_map(minutes_corpus, removePunctuation)
-minutes_corpus &lt;- tm_map(minutes_corpus, stripWhitespace)
-minutes_corpus &lt;- tm_map(minutes_corpus, stemDocument)
+minutes_corpus &lt;- Corpus(VectorSource(minutes_pdf)) %&gt;% 
+  tm_map(removeWords, stopwords("english")) %&gt;% 
+  tm_map(removeNumbers) %&gt;% 
+  tm_map(removePunctuation) %&gt;% 
+  tm_map(stripWhitespace)  
+  # tm_map(stemDocument)
 ```
+
 Now we convert the list to a term document matrix 
 
+
 ```r
-minutes_dtm &lt;- TermDocumentMatrix(minutes_corpus)
+minutes_dtm &lt;- minutes_corpus %&gt;% 
+  TermDocumentMatrix()
 
 minutes_dtm
 ```
 
 ```
-## &lt;&lt;TermDocumentMatrix (terms: 1580, documents: 76)&gt;&gt;
-## Non-/sparse entries: 20452/99628
-## Sparsity           : 83%
-## Maximal term length: 18
+## &lt;&lt;TermDocumentMatrix (terms: 2293, documents: 76)&gt;&gt;
+## Non-/sparse entries: 23955/150313
+## Sparsity           : 86%
+## Maximal term length: 19
 ## Weighting          : term frequency (tf)
 ```
 
@@ -287,14 +289,14 @@ head(tidy_minutes)
 
 ```
 ## # A tibble: 6 x 4
-##   word      document count date               
-##   &lt;chr&gt;     &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;             
-## 1 accompani 1            2 2014-04-07 10:50:30
-## 2 accord    1            3 2014-04-07 10:50:30
-## 3 achiev    1            1 2014-04-07 10:50:30
-## 4 activ     1           11 2014-04-07 10:50:30
-## 5 addit     1            1 2014-04-07 10:50:30
-## 6 advanc    1            2 2014-04-07 10:50:30
+##   word         document count date               
+##   &lt;chr&gt;        &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;             
+## 1 accompanied  1            1 2014-04-07 10:50:30
+## 2 accompanying 1            1 2014-04-07 10:50:30
+## 3 according    1            3 2014-04-07 10:50:30
+## 4 achieve      1            1 2014-04-07 10:50:30
+## 5 activity     1           11 2014-04-07 10:50:30
+## 6 addition     1            1 2014-04-07 10:50:30
 ```
 
 ---
@@ -316,14 +318,14 @@ tidy_minutes_head
 
 ```
 ## # A tibble: 6 x 2
-##   word     count_sum
-##   &lt;chr&gt;        &lt;dbl&gt;
-## 1 rate          2004
-## 2 committe      1191
-## 3 member        1041
-## 4 inflat        1009
-## 5 interest       987
-## 6 continu        864
+##   word      count_sum
+##   &lt;chr&gt;         &lt;dbl&gt;
+## 1 rate           1889
+## 2 committee      1189
+## 3 inflation      1009
+## 4 interest        987
+## 5 members         986
+## 6 growth          787
 ```
 
 ---
@@ -371,12 +373,12 @@ head(minutes_sentiment)
 ## # A tibble: 6 x 7
 ##   word  document count date                year_pub minutes_total sentiment
 ##   &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;                 &lt;int&gt;         &lt;int&gt; &lt;chr&gt;    
-## 1 bound 1            2 2014-04-07 10:50:30     2014           308 constrai~
-## 2 defi~ 1            1 2014-04-07 10:50:30     2014           308 negative 
-## 3 depe~ 1            1 2014-04-07 10:50:30     2014           308 uncertai~
-## 4 depe~ 1            1 2014-04-07 10:50:30     2014           308 constrai~
-## 5 entr~ 1            1 2014-04-07 10:50:30     2014           308 constrai~
-## 6 good  1            2 2014-04-07 10:50:30     2014           308 positive
+## 1 achi~ 1            1 2014-04-07 10:50:30     2014           364 positive 
+## 2 appa~ 1            2 2014-04-07 10:50:30     2014           364 uncertai~
+## 3 beli~ 1            2 2014-04-07 10:50:30     2014           364 uncertai~
+## 4 bound 1            2 2014-04-07 10:50:30     2014           364 constrai~
+## 5 decl~ 1            4 2014-04-07 10:50:30     2014           364 negative 
+## 6 decl~ 1            2 2014-04-07 10:50:30     2014           364 negative
 ```
 
 ---
@@ -425,7 +427,12 @@ From the __stm__ manual:
 
 class: inverse, center, middle
 
-# Conclusions
+# Miscellaneous
+
+---
+
+- Provide an RMarkdown version of the document  
+- 
 
 ---
 

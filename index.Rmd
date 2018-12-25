@@ -234,18 +234,20 @@ minutes_pdf %>%
 The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc.
 
 ```{r}
-minutes_corpus <- Corpus(VectorSource(minutes_pdf))
-
-minutes_corpus <- tm_map(minutes_corpus, removeWords, stopwords("english"))
-minutes_corpus <- tm_map(minutes_corpus, removeNumbers)
-minutes_corpus <- tm_map(minutes_corpus, removePunctuation)
-minutes_corpus <- tm_map(minutes_corpus, stripWhitespace)
-minutes_corpus <- tm_map(minutes_corpus, stemDocument)
+minutes_corpus <- Corpus(VectorSource(minutes_pdf)) %>% 
+  tm_map(removeWords, stopwords("english")) %>% 
+  tm_map(removeNumbers) %>% 
+  tm_map(removePunctuation) %>% 
+  tm_map(stripWhitespace)  
+  # tm_map(stemDocument)
 
 ```
+
 Now we convert the list to a term document matrix 
+
 ```{r}
-minutes_dtm <- TermDocumentMatrix(minutes_corpus)
+minutes_dtm <- minutes_corpus %>% 
+  TermDocumentMatrix()
 
 minutes_dtm
 ```
@@ -405,7 +407,17 @@ ggplot(td_gamma, aes(gamma, fill = as.factor(topic))) +
 
 class: inverse, center, middle
 
-# Conclusions
+# Miscellaneous
+
+---
+
+# Minor Comments
+
+- Provide an RMarkdown version of the document  
+
+- Avoid using word clouds  
+
+- Check robustness to `stemDociment`
 
 ---
 
