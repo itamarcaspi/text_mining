@@ -427,5 +427,11 @@ class: inverse, center, middle
 
 Comments?
 
-[<i class="fa fa-envelope"></i> ](mailto:caspi.itamar@gmail.com) caspi.itamar@gmail.com \|
+\begin{table}{rr}
+[<i class="fa fa-paper-plane"></i> ](mailto:caspi.itamar@gmail.com) & caspi.itamar@gmail.com \\
+[<i class="fa fa-github"></i> ](https://github.com/itamarcaspi/) & github.com/itamarcaspi
+\end{table}
+
+
+[<i class="fa fa-paper-plane"></i> ](mailto:caspi.itamar@gmail.com) caspi.itamar@gmail.com \|
 [<i class="fa fa-github"></i> ](https://github.com/itamarcaspi/) github.com/itamarcaspi  
