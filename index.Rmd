@@ -73,7 +73,9 @@ htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 class: inverse, center, middle
 
 # Reproducable research:
-## Results are accompanoied with the data and code used to produce them
+```{r, echo=FALSE, out.width = "35%"}
+include_graphics("https://3c1703fe8d.site.internapcdn.net/newman/gfx/news/hires/2016/howscientist.png")
+```
 
 ---
 
@@ -155,7 +157,7 @@ Next, convert the PDFs to text, clean some mess, and create a list of text files
 minutes_pdf <- pdf_files %>%
     map_chr(~ pdf_text(.) %>%
               paste(collapse = " ") %>% 
-              gsub(pattern = "\r\n", replacement = " ") %>% 
+              # gsub(pattern = "\r\n", replacement = " ") %>%
               tolower()
             )
 
@@ -183,7 +185,7 @@ minutes_dates <- pdf_files %>%
   do.call("c", .) %>% 
   as.tibble() %>% 
   rename(date = value) %>% 
-  mutate(document = as.character(1:n()))
+  mutate(document = row_number())
 
 head(minutes_dates, 3)
 
@@ -194,7 +196,7 @@ head(minutes_dates, 3)
 class: inverse, center, middle
 
 # Preprocessing: 
-## Avoiding "garbage in, garbage out"
+![](https://imgs.xkcd.com/comics/machine_learning.png)
 
 ---
 
@@ -205,7 +207,7 @@ The important part of the minutes is "narrow-forum" discussion. The following lo
 ```{r }
 for (i in 1:length(minutes_pdf)) {
   narrow_start <- str_locate(minutes_pdf[i],
-                             "the narrow-forum discussion")[1,1][[1]]
+                             "the narrow-forum")[1,1][[1]]
   narrow_end   <- str_locate(minutes_pdf[i],
                              "participants in the narrow-forum discussion")[1,1][[1]] - 1
   minutes_pdf[i] <- str_sub(minutes_pdf[i], narrow_start, narrow_end)
@@ -262,6 +264,7 @@ minutes_dtm
 
 ```{r}
 tidy_minutes <- tidy(minutes_dtm) %>% 
+  mutate(document = as.integer(document)) %>% 
   rename(word = term) %>% 
   left_join(minutes_dates)
 
@@ -417,7 +420,7 @@ class: inverse, center, middle
 
 - Avoid using word clouds  
 
-- Check robustness w.r.t `stemDociment`
+- Check robustness w.r.t `stemDocument`
 
 ---
 
@@ -427,11 +430,61 @@ class: inverse, center, middle
 
 Comments?
 
-\begin{table}{rr}
+\begin{tabular}{rr}
 [<i class="fa fa-paper-plane"></i> ](mailto:caspi.itamar@gmail.com) & caspi.itamar@gmail.com \\
 [<i class="fa fa-github"></i> ](https://github.com/itamarcaspi/) & github.com/itamarcaspi
-\end{table}
+\end{tabular}
 
 
 [<i class="fa fa-paper-plane"></i> ](mailto:caspi.itamar@gmail.com) caspi.itamar@gmail.com \|
 [<i class="fa fa-github"></i> ](https://github.com/itamarcaspi/) github.com/itamarcaspi  
+
+
+
+---
+
+# Appendix
+
+
+```{r }
+
+minutes_keep <- minutes_pdf %>% 
+  as_tibble() %>% 
+  mutate(is_keep = ifelse(str_detect(value, "decided to keep"), 1, 0)) %>% 
+  select(is_keep) %>% 
+  mutate(document = row_number())
+
+df <- minutes_pdf %>% 
+  as_tibble() %>% 
+  mutate(document = row_number()) %>% 
+  mutate(value = str_split(value,"\r\n")) %>% 
+  rename(line = value) %>% 
+  left_join(minutes_dates) %>% 
+  left_join(minutes_keep) %>% 
+  unnest(line)
+  
+```
+
+```{r remedy001}
+
+library(rsample)
+
+minutes_split <- df %>%
+  select(document) %>%
+  initial_split()
+train_data <- training(minutes_split)
+test_data <- testing(minutes_split)
+
+```
+
+
+```{r remedy002}
+
+sparse_words <- tidy_minutes %>%
+  count(document, word) %>%
+  inner_join(train_data) %>%
+  cast_sparse(document, word, n)
+
+class(sparse_words)
+dim(sparse_words)
+```

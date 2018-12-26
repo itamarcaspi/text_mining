@@ -64,7 +64,7 @@ class: center, middle, inverse, title-slide
 class: inverse, center, middle
 
 # Reproducable research:
-## Results are accompanoied with the data and code used to produce them
+&lt;img src="https://3c1703fe8d.site.internapcdn.net/newman/gfx/news/hires/2016/howscientist.png" width="35%" /&gt;
 
 ---
 
@@ -189,7 +189,7 @@ head(minutes_dates, 3)
 class: inverse, center, middle
 
 # Preprocessing: 
-## Avoiding "garbage in, garbage out"
+![](https://imgs.xkcd.com/comics/machine_learning.png)
 
 ---
 
@@ -263,10 +263,10 @@ minutes_dtm
 ```
 
 ```
-## &lt;&lt;TermDocumentMatrix (terms: 2293, documents: 76)&gt;&gt;
-## Non-/sparse entries: 23955/150313
-## Sparsity           : 86%
-## Maximal term length: 19
+## &lt;&lt;TermDocumentMatrix (terms: 2567, documents: 100)&gt;&gt;
+## Non-/sparse entries: 29128/227572
+## Sparsity           : 89%
+## Maximal term length: 22
 ## Weighting          : term frequency (tf)
 ```
 
@@ -320,12 +320,12 @@ tidy_minutes_head
 ## # A tibble: 6 x 2
 ##   word      count_sum
 ##   &lt;chr&gt;         &lt;dbl&gt;
-## 1 rate           1889
-## 2 committee      1189
-## 3 inflation      1009
-## 4 interest        987
-## 5 members         986
-## 6 growth          787
+## 1 rate           2300
+## 2 interest       1327
+## 3 inflation      1271
+## 4 committee      1200
+## 5 members        1032
+## 6 growth          928
 ```
 
 ---
@@ -386,7 +386,7 @@ head(minutes_sentiment)
 # Sentiment Analysis of BoI Minutes
 ## _Within_ Relative Frequency is More Informative
 
-&lt;img src="index_files/figure-html/unnamed-chunk-17-1..svg" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-18-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -415,13 +415,13 @@ From the __stm__ manual:
 ---
 # Which Words Contribute Most to  Each Topic?
 
-&lt;img src="index_files/figure-html/unnamed-chunk-19-1..svg" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-20-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
 # The Distrubution of Topics Across Documents
 
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1..svg" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-21-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -437,7 +437,7 @@ class: inverse, center, middle
 
 - Avoid using word clouds  
 
-- Check robustness w.r.t `stemDociment`
+- Check robustness w.r.t `stemDocument`
 
 ---
 
@@ -447,10 +447,10 @@ class: inverse, center, middle
 
 Comments?
 
-\begin{table}{rr}
+\begin{tabular}{rr}
 [&lt;i class="fa fa-paper-plane"&gt;&lt;/i&gt; ](mailto:caspi.itamar@gmail.com) &amp; caspi.itamar@gmail.com \\
 [&lt;i class="fa fa-github"&gt;&lt;/i&gt; ](https://github.com/itamarcaspi/) &amp; github.com/itamarcaspi
-\end{table}`
+\end{tabular}`
 
 
 [&lt;i class="fa fa-paper-plane"&gt;&lt;/i&gt; ](mailto:caspi.itamar@gmail.com) caspi.itamar@gmail.com \|
