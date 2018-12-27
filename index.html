@@ -92,8 +92,8 @@ Reproducing the results depends on installing and loading the following packages
 
 
 ```r
-library(tm)       # for cleaning and transforming text to data
-library(tidytext) # for working with tidy text objects
+library(tm)         # for cleaning and transforming text to data
+library(tidytext)   # for working with tidy text objects
 library(tidyverse)  # for data wrangling and visualization
 ```
  
@@ -290,7 +290,6 @@ tidy_minutes &lt;- minutes_pdf %&gt;%
     left_join(minutes_dates) %&gt;% 
     filter(date &gt;= ymd("2011-11-7"))
     
-
 head(tidy_minutes)
 ```
 
@@ -329,6 +328,8 @@ tidy_minutes %&gt;%
 ## 4 growth      816
 ## 5 percent     620
 ```
+
+Let's remove uninformative(?) words
 
 
 ```r
@@ -429,6 +430,36 @@ From the __stm__ manual:
 # The Distrubution of Topics Across Documents
 
 &lt;img src="index_files/figure-html/unnamed-chunk-20-1..svg" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Comments on the Forecasting Exercise
+
+The problem can be cast as   
+
+`$$y_t = f(X_{t-1})+\varepsilon_t$$`
+where `\(y_t\)` is the direction of change in the interest rate (e.g., `\(y_t\in\{-1,0,1\}\)`) rate `\(X_{t-1}\)` is a vactor of predetermined features.  
+
+In our case, `\(X_{t-1}\)` includes a battary of text-related indicators, as well as other economic \&amp; financial variables and __interactions__.  
+
+The goal of the exercise should be defined in terms of **prediction quality** (RMSE is not appropriate here.)  
+
+---
+
+# Comments on the Forecasting Exercise
+
+Lasso seems extremely fit to answer tese types of questions, mostly because it is easy to interpert.  
+
+
+We can ask two interesting questions:
+
+- Does adding text-related indicators outpreform a naive model?  
+
+- Which indicators (or inteactions) are good predictors?  
+
+
+This framework can easily be extended to test for predictability in other types of response variables (e.g., the exchange rate)
+
 
 ---
 

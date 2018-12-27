@@ -169,15 +169,12 @@ minutes_pdf <- pdf_files %>%
 First, we need to load the **lubridate** package that handles date objects:
 
 ```{r }
-
 library(lubridate)
-
 ```
 
 The PDF files include information about their date of creation. We can use this to create a tibble with dates for every document
  
 ```{r}
-
 minutes_dates <- pdf_files %>% 
   map(pdf_info) %>% 
   map("created") %>% 
@@ -187,7 +184,6 @@ minutes_dates <- pdf_files %>%
   mutate(document = row_number())
 
 head(minutes_dates, 3)
-
 ```
 
 ---
@@ -253,7 +249,6 @@ tidy_minutes <- minutes_pdf %>%
     left_join(minutes_dates) %>% 
     filter(date >= ymd("2011-11-7"))
     
-
 head(tidy_minutes)
 ```
 
@@ -269,6 +264,8 @@ tidy_minutes %>%
   top_n(5)
   
 ```
+
+Let's remove uninformative(?) words
 
 ```{r }
 
@@ -393,6 +390,36 @@ ggplot(td_gamma, aes(gamma, fill = as.factor(topic))) +
   theme_minimal()
 
 ```
+
+---
+
+# Comments on the Forecasting Exercise
+
+The problem can be cast as   
+
+$$y_t = f(X_{t-1})+\varepsilon_t$$
+where $y_t$ is the direction of change in the interest rate (e.g., $y_t\in\{-1,0,1\}$) rate $X_{t-1}$ is a vactor of predetermined features.  
+
+In our case, $X_{t-1}$ includes a battary of text-related indicators, as well as other economic \& financial variables and __interactions__.  
+
+The goal of the exercise should be defined in terms of **prediction quality** (RMSE is not appropriate here.)  
+
+---
+
+# Comments on the Forecasting Exercise
+
+Lasso seems extremely fit to answer tese types of questions, mostly because it is easy to interpert.  
+
+
+We can ask two interesting questions:
+
+- Does adding text-related indicators outpreform a naive model?  
+
+- Which indicators (or inteactions) are good predictors?  
+
+
+This framework can easily be extended to test for predictability in other types of response variables (e.g., the exchange rate)
+
 
 ---
 
