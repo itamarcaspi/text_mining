@@ -17,7 +17,7 @@ class: center, middle, inverse, title-slide
 # Discussion of “Text Mining Methodologies with R”
 ## By Benchimol, Kazinnik, and Saadon
 ### Itamar Caspi
-### December 30, 2018 (updated: 2018-12-26)
+### December 30, 2018 (updated: 2018-12-27)
 
 ---
 
@@ -94,7 +94,7 @@ Reproducing the results depends on installing and loading the following packages
 ```r
 library(tm)       # for cleaning and transforming text to data
 library(tidytext) # for working with tidy text objects
-library(tidyverse)  # for data wrangling and generating plots
+library(tidyverse)  # for data wrangling and visualization
 ```
  
 
@@ -144,7 +144,7 @@ Next, convert the PDFs to text, clean some mess, and create a list of text files
 minutes_pdf &lt;- pdf_files %&gt;%
     map_chr(~ pdf_text(.) %&gt;%
               paste(collapse = " ") %&gt;% 
-              gsub(pattern = "\r\n", replacement = " ") %&gt;% 
+              gsub(pattern = "\r\n", replacement = " ") %&gt;%
               tolower()
             )
 ```
@@ -170,7 +170,7 @@ minutes_dates &lt;- pdf_files %&gt;%
   do.call("c", .) %&gt;% 
   as.tibble() %&gt;% 
   rename(date = value) %&gt;% 
-  mutate(document = as.character(1:n()))
+  mutate(document = row_number())
 
 head(minutes_dates, 3)
 ```
@@ -178,10 +178,10 @@ head(minutes_dates, 3)
 ```
 ## # A tibble: 3 x 2
 ##   date                document
-##   &lt;dttm&gt;              &lt;chr&gt;   
-## 1 2014-04-07 10:50:30 1       
-## 2 2015-04-05 11:57:26 2       
-## 3 2013-08-12 11:13:07 3
+##   &lt;dttm&gt;                 &lt;int&gt;
+## 1 2014-04-07 10:50:30        1
+## 2 2015-04-05 11:57:26        2
+## 3 2013-08-12 11:13:07        3
 ```
 
 ---
@@ -217,115 +217,123 @@ We can check that none of the list's elements is empty by sorting them out and e
 
 ```r
 minutes_pdf %&gt;%
-  map_chr(str_length) %&gt;%
-  as.numeric() %&gt;%
-  as_tibble() %&gt;%
-  arrange(value) %&gt;% 
-  head()
+  map_int(str_length) %&gt;%
+  as_tibble() %&gt;% 
+  rename(word_count = value) %&gt;% 
+  mutate(document = row_number()) %&gt;% 
+  left_join(minutes_dates) %&gt;% 
+  arrange(word_count) %&gt;% 
+  head() %&gt;% 
+  kable(format = "html")
 ```
 
-```
-## # A tibble: 6 x 1
-##   value
-##   &lt;dbl&gt;
-## 1     0
-## 2  4166
-## 3  5015
-## 4  5145
-## 5  5407
-## 6  5424
-```
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:right;"&gt; word_count &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; document &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; date &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 27 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2015-07-06 12:59:22 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 4166 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 38 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2017-12-11 08:52:52 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5015 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 43 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2017-11-02 13:02:11 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5145 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 47 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2018-06-10 16:03:07 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5407 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 37 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2018-01-24 12:12:02 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:right;"&gt; 5424 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 77 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; 2012-10-09 15:56:14 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
 
 ---
 
-# Cleaning the Text
-
-The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc.
-
-
-```r
-minutes_corpus &lt;- Corpus(VectorSource(minutes_pdf)) %&gt;% 
-  tm_map(removeWords, stopwords("english")) %&gt;% 
-  tm_map(removeNumbers) %&gt;% 
-  tm_map(removePunctuation) %&gt;% 
-  tm_map(stripWhitespace)  
-  # tm_map(stemDocument)
-```
-
-Now we convert the list to a term document matrix 
-
-
-```r
-minutes_dtm &lt;- minutes_corpus %&gt;% 
-  TermDocumentMatrix()
-
-minutes_dtm
-```
-
-```
-## &lt;&lt;TermDocumentMatrix (terms: 2567, documents: 100)&gt;&gt;
-## Non-/sparse entries: 29128/227572
-## Sparsity           : 89%
-## Maximal term length: 22
-## Weighting          : term frequency (tf)
-```
-
----
-
-# Working with Tidy Text
+# Tidying the Text
 
 - In a tidy data set each variable is a column, each observation is a row, and each type of observational unit is an entry in the table.
-- We can tidy the text using the `tidy()` function from the **tidytext** package.  
-- Once the test is tidy we can easily use our dates tibble to add a date column with the date of each minutes  
+- We can tidy the text using the `unest_tokens()` function from the **tidytext** package.  
+- Once the text is tidy we can easily use our `minutes_date` tibble to add a date column with the date of each minutes  
 
 
 ```r
-tidy_minutes &lt;- tidy(minutes_dtm) %&gt;% 
-  rename(word = term) %&gt;% 
-  left_join(minutes_dates)
+tidy_minutes &lt;- minutes_pdf %&gt;% 
+    as_tibble() %&gt;% 
+    mutate(document = row_number()) %&gt;% 
+    mutate(value = str_split(value,"\r\n")) %&gt;% 
+    unnest(value) %&gt;% 
+    unnest_tokens(word, value) %&gt;% 
+    filter(str_detect(word, "[a-z]")) %&gt;%
+    anti_join(stop_words) %&gt;% 
+    left_join(minutes_dates) %&gt;% 
+    filter(date &gt;= ymd("2011-11-7"))
+    
 
 head(tidy_minutes)
 ```
 
 ```
-## # A tibble: 6 x 4
-##   word         document count date               
-##   &lt;chr&gt;        &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;             
-## 1 accompanied  1            1 2014-04-07 10:50:30
-## 2 accompanying 1            1 2014-04-07 10:50:30
-## 3 according    1            3 2014-04-07 10:50:30
-## 4 achieve      1            1 2014-04-07 10:50:30
-## 5 activity     1           11 2014-04-07 10:50:30
-## 6 addition     1            1 2014-04-07 10:50:30
+## # A tibble: 6 x 3
+##   document word       date               
+##      &lt;int&gt; &lt;chr&gt;      &lt;dttm&gt;             
+## 1        1 narrow     2014-04-07 10:50:30
+## 2        1 forum      2014-04-07 10:50:30
+## 3        1 discussion 2014-04-07 10:50:30
+## 4        1 rate       2014-04-07 10:50:30
+## 5        1 decision   2014-04-07 10:50:30
+## 6        1 april      2014-04-07 10:50:30
 ```
+
 
 ---
 
 # Which Words Actually Matter?
 
-Now, that the text is tidy, we can easily spot the most frequent words
+Now, we can easily answer what are the most common words in these documents
+
+```r
+tidy_minutes %&gt;% 
+  count(word, sort = TRUE) %&gt;% 
+  top_n(5)
+```
+
+```
+## # A tibble: 5 x 2
+##   word          n
+##   &lt;chr&gt;     &lt;int&gt;
+## 1 rate       1989
+## 2 committee  1194
+## 3 inflation  1057
+## 4 growth      816
+## 5 percent     620
+```
 
 
 ```r
-tidy_minutes_head &lt;- tidy_minutes %&gt;%
-  group_by(word) %&gt;% 
-  summarise(count_sum = sum(count)) %&gt;% 
-  arrange(desc(count_sum)) %&gt;% 
-  head()
-
-tidy_minutes_head
-```
-
-```
-## # A tibble: 6 x 2
-##   word      count_sum
-##   &lt;chr&gt;         &lt;dbl&gt;
-## 1 rate           2300
-## 2 interest       1327
-## 3 inflation      1271
-## 4 committee      1200
-## 5 members        1032
-## 6 growth          928
+tidy_minutes &lt;- tidy_minutes %&gt;% 
+  filter(!word %in% c("rate", "committee"))
 ```
 
 ---
@@ -361,7 +369,6 @@ Here is how we can apply the Loughran and McDonald sentiment analysis the "tidy"
 
 ```r
 minutes_sentiment &lt;- tidy_minutes %&gt;%
-  mutate(year_pub = as.integer(year(date))) %&gt;% 
   add_count(date) %&gt;%
   rename(minutes_total = n) %&gt;% 
   inner_join(get_sentiments("loughran"))
@@ -370,23 +377,23 @@ head(minutes_sentiment)
 ```
 
 ```
-## # A tibble: 6 x 7
-##   word  document count date                year_pub minutes_total sentiment
-##   &lt;chr&gt; &lt;chr&gt;    &lt;dbl&gt; &lt;dttm&gt;                 &lt;int&gt;         &lt;int&gt; &lt;chr&gt;    
-## 1 achi~ 1            1 2014-04-07 10:50:30     2014           364 positive 
-## 2 appa~ 1            2 2014-04-07 10:50:30     2014           364 uncertai~
-## 3 beli~ 1            2 2014-04-07 10:50:30     2014           364 uncertai~
-## 4 bound 1            2 2014-04-07 10:50:30     2014           364 constrai~
-## 5 decl~ 1            4 2014-04-07 10:50:30     2014           364 negative 
-## 6 decl~ 1            2 2014-04-07 10:50:30     2014           364 negative
+## # A tibble: 6 x 5
+##   document word        date                minutes_total sentiment   
+##      &lt;int&gt; &lt;chr&gt;       &lt;dttm&gt;                      &lt;int&gt; &lt;chr&gt;       
+## 1        1 declined    2014-04-07 10:50:30           644 negative    
+## 2        1 bound       2014-04-07 10:50:30           644 constraining
+## 3        1 bound       2014-04-07 10:50:30           644 constraining
+## 4        1 stability   2014-04-07 10:50:30           644 positive    
+## 5        1 decline     2014-04-07 10:50:30           644 negative    
+## 6        1 improvement 2014-04-07 10:50:30           644 positive
 ```
 
 ---
 
 # Sentiment Analysis of BoI Minutes
-## _Within_ Relative Frequency is More Informative
+## __Within__ Relative Frequency is More Informative
 
-&lt;img src="index_files/figure-html/unnamed-chunk-18-1..svg" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-17-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -415,13 +422,13 @@ From the __stm__ manual:
 ---
 # Which Words Contribute Most to  Each Topic?
 
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1..svg" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-19-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
 # The Distrubution of Topics Across Documents
 
-&lt;img src="index_files/figure-html/unnamed-chunk-21-1..svg" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-20-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -447,14 +454,84 @@ class: inverse, center, middle
 
 Comments?
 
-\begin{tabular}{rr}
-[&lt;i class="fa fa-paper-plane"&gt;&lt;/i&gt; ](mailto:caspi.itamar@gmail.com) &amp; caspi.itamar@gmail.com \\
-[&lt;i class="fa fa-github"&gt;&lt;/i&gt; ](https://github.com/itamarcaspi/) &amp; github.com/itamarcaspi
-\end{tabular}`
-
-
 [&lt;i class="fa fa-paper-plane"&gt;&lt;/i&gt; ](mailto:caspi.itamar@gmail.com) caspi.itamar@gmail.com \|
-[&lt;i class="fa fa-github"&gt;&lt;/i&gt; ](https://github.com/itamarcaspi/) github.com/itamarcaspi
+[&lt;i class="fa fa-github"&gt;&lt;/i&gt; ](https://github.com/itamarcaspi/) github.com/itamarcaspi  
+
+
+
+---
+
+# Appendix
+
+---
+
+# Cleaning the Text
+
+The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc.
+
+
+```r
+minutes_corpus &lt;- Corpus(VectorSource(minutes_pdf)) %&gt;% 
+  tm_map(removeWords, stopwords("english")) %&gt;% 
+  tm_map(removeNumbers) %&gt;% 
+  tm_map(removePunctuation) %&gt;% 
+  tm_map(stripWhitespace)  
+  # tm_map(stemDocument)
+```
+
+Now we convert the list to a term document matrix 
+
+
+```r
+minutes_dtm &lt;- minutes_corpus %&gt;% 
+  TermDocumentMatrix()
+
+minutes_dtm
+```
+
+---
+
+
+
+```r
+minutes_keep &lt;- minutes_pdf %&gt;% 
+  as_tibble() %&gt;% 
+  mutate(is_keep = ifelse(str_detect(value, "decided to keep"), 1, 0)) %&gt;% 
+  select(is_keep) %&gt;% 
+  mutate(document = row_number())
+
+df &lt;- minutes_pdf %&gt;% 
+  as_tibble() %&gt;% 
+  mutate(document = row_number()) %&gt;% 
+  mutate(value = str_split(value,"\r\n")) %&gt;% 
+  rename(line = value) %&gt;% 
+  left_join(minutes_dates) %&gt;% 
+  left_join(minutes_keep) %&gt;% 
+  unnest(line)
+```
+
+
+```r
+library(rsample)
+
+minutes_split &lt;- df %&gt;%
+  select(document) %&gt;%
+  initial_split()
+train_data &lt;- training(minutes_split)
+test_data &lt;- testing(minutes_split)
+```
+
+
+
+```r
+sparse_words &lt;- tidy_minutes %&gt;%
+  count(document, word) %&gt;%
+  inner_join(train_data) %&gt;%
+  cast_sparse(document, word, n)
+
+class(sparse_words)
+dim(sparse_words)
+```
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({

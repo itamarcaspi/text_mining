@@ -103,9 +103,9 @@ Reproducing the results depends on installing and loading the following packages
 
 ```{r}
 
-library(tm)       # for cleaning and transforming text to data
-library(tidytext) # for working with tidy text objects
-library(tidyverse)  # for data wrangling and generating plots
+library(tm)         # for cleaning and transforming text to data
+library(tidytext)   # for working with tidy text objects
+library(tidyverse)  # for data wrangling and visualization
 
 ```
  
@@ -157,10 +157,9 @@ Next, convert the PDFs to text, clean some mess, and create a list of text files
 minutes_pdf <- pdf_files %>%
     map_chr(~ pdf_text(.) %>%
               paste(collapse = " ") %>% 
-              # gsub(pattern = "\r\n", replacement = " ") %>%
+              gsub(pattern = "\r\n", replacement = " ") %>%
               tolower()
             )
-
 ```
 
 ---
@@ -207,7 +206,7 @@ The important part of the minutes is "narrow-forum" discussion. The following lo
 ```{r }
 for (i in 1:length(minutes_pdf)) {
   narrow_start <- str_locate(minutes_pdf[i],
-                             "the narrow-forum")[1,1][[1]]
+                             "the narrow-forum discussion")[1,1][[1]]
   narrow_end   <- str_locate(minutes_pdf[i],
                              "participants in the narrow-forum discussion")[1,1][[1]] - 1
   minutes_pdf[i] <- str_sub(minutes_pdf[i], narrow_start, narrow_end)
@@ -222,70 +221,60 @@ We can check that none of the list's elements is empty by sorting them out and e
 
 ```{r}
 minutes_pdf %>%
-  map_chr(str_length) %>%
-  as.numeric() %>%
-  as_tibble() %>%
-  arrange(value) %>% 
-  head()
+  map_int(str_length) %>%
+  as_tibble() %>% 
+  rename(word_count = value) %>% 
+  mutate(document = row_number()) %>% 
+  left_join(minutes_dates) %>% 
+  arrange(word_count) %>% 
+  head() %>% 
+  kable(format = "html")
+  
 ```
 
 ---
 
-# Cleaning the Text
-
-The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc.
-
-```{r}
-minutes_corpus <- Corpus(VectorSource(minutes_pdf)) %>% 
-  tm_map(removeWords, stopwords("english")) %>% 
-  tm_map(removeNumbers) %>% 
-  tm_map(removePunctuation) %>% 
-  tm_map(stripWhitespace)  
-  # tm_map(stemDocument)
-
-```
-
-Now we convert the list to a term document matrix 
-
-```{r}
-minutes_dtm <- minutes_corpus %>% 
-  TermDocumentMatrix()
-
-minutes_dtm
-```
-
----
-
-# Working with Tidy Text
+# Tidying the Text
 
 - In a tidy data set each variable is a column, each observation is a row, and each type of observational unit is an entry in the table.
-- We can tidy the text using the `tidy()` function from the **tidytext** package.  
-- Once the test is tidy we can easily use our dates tibble to add a date column with the date of each minutes  
+- We can tidy the text using the `unest_tokens()` function from the **tidytext** package.  
+- Once the text is tidy we can easily use our `minutes_date` tibble to add a date column with the date of each minutes  
 
-```{r}
-tidy_minutes <- tidy(minutes_dtm) %>% 
-  mutate(document = as.integer(document)) %>% 
-  rename(word = term) %>% 
-  left_join(minutes_dates)
+```{r }
+
+tidy_minutes <- minutes_pdf %>% 
+    as_tibble() %>% 
+    mutate(document = row_number()) %>% 
+    mutate(value = str_split(value,"\r\n")) %>% 
+    unnest(value) %>% 
+    unnest_tokens(word, value) %>% 
+    filter(str_detect(word, "[a-z]")) %>%
+    anti_join(stop_words) %>% 
+    left_join(minutes_dates) %>% 
+    filter(date >= ymd("2011-11-7"))
+    
 
 head(tidy_minutes)
 ```
+
 
 ---
 
 # Which Words Actually Matter?
 
-Now, that the text is tidy, we can easily spot the most frequent words
-
+Now, we can easily answer what are the most common words in these documents
 ```{r}
-tidy_minutes_head <- tidy_minutes %>%
-  group_by(word) %>% 
-  summarise(count_sum = sum(count)) %>% 
-  arrange(desc(count_sum)) %>% 
-  head()
-
-tidy_minutes_head
+tidy_minutes %>% 
+  count(word, sort = TRUE) %>% 
+  top_n(5)
   
+```
+
+```{r }
+
+tidy_minutes <- tidy_minutes %>% 
+  filter(!word %in% c("rate", "committee"))
+
 ```
 
 ---
@@ -308,7 +297,6 @@ Here is how we can apply the Loughran and McDonald sentiment analysis the "tidy"
 ```{r }
 
 minutes_sentiment <- tidy_minutes %>%
-  mutate(year_pub = as.integer(year(date))) %>% 
   add_count(date) %>%
   rename(minutes_total = n) %>% 
   inner_join(get_sentiments("loughran"))
@@ -320,7 +308,7 @@ head(minutes_sentiment)
 ---
 
 # Sentiment Analysis of BoI Minutes
-## _Within_ Relative Frequency is More Informative
+## __Within__ Relative Frequency is More Informative
 
 ```{r echo = FALSE, fig.width=10, fig.height=6, fig.align='center'}
 
@@ -374,7 +362,7 @@ td_beta <- tidy(topic_model)
 
 td_beta %>%
     group_by(topic) %>%
-    top_n(8, beta) %>%
+    top_n(10, beta) %>%
     ungroup() %>%
     mutate(topic = paste0("Topic ", topic),
            term = reorder_within(term, beta, topic)) %>%
@@ -430,12 +418,6 @@ class: inverse, center, middle
 
 Comments?
 
-\begin{tabular}{rr}
-[<i class="fa fa-paper-plane"></i> ](mailto:caspi.itamar@gmail.com) & caspi.itamar@gmail.com \\
-[<i class="fa fa-github"></i> ](https://github.com/itamarcaspi/) & github.com/itamarcaspi
-\end{tabular}
-
-
 [<i class="fa fa-paper-plane"></i> ](mailto:caspi.itamar@gmail.com) caspi.itamar@gmail.com \|
 [<i class="fa fa-github"></i> ](https://github.com/itamarcaspi/) github.com/itamarcaspi  
 
@@ -445,8 +427,35 @@ Comments?
 
 # Appendix
 
+---
 
-```{r }
+# Cleaning the Text
+
+The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc.
+
+```{r, eval=FALSE}
+minutes_corpus <- Corpus(VectorSource(minutes_pdf)) %>% 
+  tm_map(removeWords, stopwords("english")) %>% 
+  tm_map(removeNumbers) %>% 
+  tm_map(removePunctuation) %>% 
+  tm_map(stripWhitespace)  
+  # tm_map(stemDocument)
+
+```
+
+Now we convert the list to a term document matrix 
+
+```{r, eval=FALSE}
+minutes_dtm <- minutes_corpus %>% 
+  TermDocumentMatrix()
+
+minutes_dtm
+```
+
+---
+
+
+```{r, eval=FALSE}
 
 minutes_keep <- minutes_pdf %>% 
   as_tibble() %>% 
@@ -465,7 +474,7 @@ df <- minutes_pdf %>%
   
 ```
 
-```{r remedy001}
+```{r, eval=FALSE}
 
 library(rsample)
 
@@ -478,7 +487,7 @@ test_data <- testing(minutes_split)
 ```
 
 
-```{r remedy002}
+```{r, eval=FALSE}
 
 sparse_words <- tidy_minutes %>%
   count(document, word) %>%
