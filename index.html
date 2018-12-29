@@ -7,8 +7,8 @@
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link href="libs/font-awesome/css/all.css" rel="stylesheet" />
     <link href="libs/font-awesome/css/v4-shims.css" rel="stylesheet" />
-    <link rel="stylesheet" href="style\rutgers.css" type="text/css" />
-    <link rel="stylesheet" href="style\rutgers-fonts.css" type="text/css" />
+    <link rel="stylesheet" href="style\middlebury.css" type="text/css" />
+    <link rel="stylesheet" href="style\middlebury-fonts.css" type="text/css" />
   </head>
   <body>
     <textarea id="source">
@@ -17,54 +17,54 @@ class: center, middle, inverse, title-slide
 # Discussion of “Text Mining Methodologies with R”
 ## By Benchimol, Kazinnik, and Saadon
 ### Itamar Caspi
-### December 30, 2018 (updated: 2018-12-27)
+### Bank of Israel <br> December 30, 2018 (updated: 2018-12-29)
 
 ---
 
 
 
 
-# What This Paper Does
+# What These Papers Do
 
-- Reviews several existing methodologies in text analysis  
+- Reviews several existing methodologies in text analysis. 
 
-- Illustrates using R
+- Illustrates using R.
 
-- Presents potential applications related to central banking
-
-
----
-
-# My Take From This Paper
-
-- A great pedagogical service to the research department
-
-- Brings attention to an important and relatively new tool
-
-- Presents interesting, though preliminary, insights
+- Presents applications related to central bank transparency.
 
 
 ---
 
-# My Comments and Suggestions
+# My Take 
+
+- A great pedagogical service to the research department.
+
+- Brings attention to an important and relatively new tool.
+
+- Presents (too) many interesting insights.
 
 
-- Need to improve the reproducibility of the paper
+---
+
+# My Comments
+
+
+- Need to improve the __reproducibility__ of the methodological paper.
 
 --
 
-- Devote more care to the text preprocessing stage
+- Devote more care to the text __preprocessing__ stage.
 
 --
 
-- Increase transparency of the topic analysis exercise
+- Focus on a specific application (Forecasting or Transparency)
 
 ---
 
-class: inverse, center, middle
+class: title-slide-section-blue, center, middle
 
-# Reproducable research:
-&lt;img src="https://3c1703fe8d.site.internapcdn.net/newman/gfx/news/hires/2016/howscientist.png" width="35%" /&gt;
+# Reproducable research
+
 
 ---
 
@@ -82,19 +82,19 @@ At current state, it is hard replicate the results in the paper since
 
 --
 
-- There is no code available to reproduce the figures in the paper  
+- The code to reproduce many of the figures in the text is missing.  
 
 ---
 
 # Which Packages?
 
-Reproducing the results depends on installing and loading the following packages:
+Reproducing the results in the paper depends on installing and loading the following packages:
 
 
 ```r
 library(tm)         # for cleaning and transforming text to data
 library(tidytext)   # for working with tidy text objects
-library(tidyverse)  # for data wrangling and visualization
+library(tidyverse)  # for wrangling date and visualization
 ```
  
 
@@ -124,12 +124,12 @@ minutes_url &lt;- pdf_urls %&gt;%
             )
 ```
 
-PROBLEM: Minute documents' links don't have a well defined URL pattern. This makes it hard to loop over the entire archive.
+PROBLEM: Minutes links don't have a well defined URL pattern. This makes it hard to loop over the entire archive.
 
 ---
 # Get Data from Files
 
-Alternatively, users can pre-download the PDF files prior the analysis and convert them to text files using the ***pdftools** package.  
+Alternatively, users can pre-download the PDF files prior the analysis and convert them to text files using the **pdftools** package.  
 
 First, make a list of the available files
 
@@ -153,17 +153,12 @@ minutes_pdf &lt;- pdf_files %&gt;%
 
 # Get Document Dates
 
-First, we need to load the **lubridate** package that handles date objects:
-
-
-```r
-library(lubridate)
-```
-
 The PDF files include information about their date of creation. We can use this to create a tibble with dates for every document
  
 
 ```r
+library(lubridate) # for working with dates and times.
+
 minutes_dates &lt;- pdf_files %&gt;% 
   map(pdf_info) %&gt;% 
   map("created") %&gt;% 
@@ -172,23 +167,26 @@ minutes_dates &lt;- pdf_files %&gt;%
   rename(date = value) %&gt;% 
   mutate(document = row_number())
 
-head(minutes_dates, 3)
+head(minutes_dates)
 ```
 
 ```
-## # A tibble: 3 x 2
+## # A tibble: 6 x 2
 ##   date                document
 ##   &lt;dttm&gt;                 &lt;int&gt;
 ## 1 2014-04-07 10:50:30        1
 ## 2 2015-04-05 11:57:26        2
 ## 3 2013-08-12 11:13:07        3
+## 4 2014-08-11 09:10:24        4
+## 5 2015-08-10 11:34:15        5
+## 6 2016-08-08 10:20:14        6
 ```
 
 ---
 
-class: inverse, center, middle
+class: title-slide-section-blue, center, middle
 
-# Preprocessing: 
+# Preprocessing
 ![](https://imgs.xkcd.com/comics/machine_learning.png)
 
 ---
@@ -273,9 +271,8 @@ minutes_pdf %&gt;%
 
 # Tidying the Text
 
-- In a tidy data set each variable is a column, each observation is a row, and each type of observational unit is an entry in the table.
-- We can tidy the text using the `unest_tokens()` function from the **tidytext** package.  
-- Once the text is tidy we can easily use our `minutes_date` tibble to add a date column with the date of each minutes  
+- In a tidy data set each variable is a column, each observation is a row, and each type of observational unit is a table.
+- We can tidy the text using the `unest_tokens()` function from the **tidytext** package.
 
 
 ```r
@@ -290,11 +287,11 @@ tidy_minutes &lt;- minutes_pdf %&gt;%
     left_join(minutes_dates) %&gt;% 
     filter(date &gt;= ymd("2011-11-7"))
     
-head(tidy_minutes)
+head(tidy_minutes, 5)
 ```
 
 ```
-## # A tibble: 6 x 3
+## # A tibble: 5 x 3
 ##   document word       date               
 ##      &lt;int&gt; &lt;chr&gt;      &lt;dttm&gt;             
 ## 1        1 narrow     2014-04-07 10:50:30
@@ -302,7 +299,6 @@ head(tidy_minutes)
 ## 3        1 discussion 2014-04-07 10:50:30
 ## 4        1 rate       2014-04-07 10:50:30
 ## 5        1 decision   2014-04-07 10:50:30
-## 6        1 april      2014-04-07 10:50:30
 ```
 
 
@@ -310,7 +306,7 @@ head(tidy_minutes)
 
 # Which Words Actually Matter?
 
-Now, we can easily answer what are the most common words in these documents
+Now that the text is tidy, we can easily answer questions like "what are the most common words in these documents?"
 
 ```r
 tidy_minutes %&gt;% 
@@ -329,7 +325,7 @@ tidy_minutes %&gt;%
 ## 5 percent     620
 ```
 
-Let's remove uninformative(?) words
+We might want to remove uninformative(?) words
 
 
 ```r
@@ -363,7 +359,7 @@ get_sentiments("loughran") %&gt;%
 
 ---
 
-# Sentiment Analysis
+# Sentiment Analysis within Tidytext
 
 Here is how we can apply the Loughran and McDonald sentiment analysis the "tidy" way
 
@@ -392,9 +388,9 @@ head(minutes_sentiment)
 ---
 
 # Sentiment Analysis of BoI Minutes
-## __Within__ Relative Frequency is More Informative
+## __Within__ Relative Frequency Might Be More Informative
 
-&lt;img src="index_files/figure-html/unnamed-chunk-17-1..svg" style="display: block; margin: auto;" /&gt;
+&lt;img src="index_files/figure-html/unnamed-chunk-16-1..svg" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -418,64 +414,101 @@ minutes_dfm &lt;- tidy_minutes %&gt;%
 ```
 
 From the __stm__ manual:  
-&lt;ru-blockquote&gt;"The most important user input in parametric topic models is the number of topics. There is no right answer to the appropriate number of topics. More topics will give more fine-grained representations of the data at the potential cost of being less precisely estimated."&lt;/ru-blockquote&gt;
-
----
-# Which Words Contribute Most to  Each Topic?
-
-&lt;img src="index_files/figure-html/unnamed-chunk-19-1..svg" style="display: block; margin: auto;" /&gt;
-
----
-
-# The Distrubution of Topics Across Documents
-
-&lt;img src="index_files/figure-html/unnamed-chunk-20-1..svg" style="display: block; margin: auto;" /&gt;
-
----
-
-# Comments on the Forecasting Exercise
-
-The problem can be cast as   
-
-`$$y_t = f(X_{t-1})+\varepsilon_t$$`
-where `\(y_t\)` is the direction of change in the interest rate (e.g., `\(y_t\in\{-1,0,1\}\)`) rate `\(X_{t-1}\)` is a vactor of predetermined features.  
-
-In our case, `\(X_{t-1}\)` includes a battary of text-related indicators, as well as other economic \&amp; financial variables and __interactions__.  
-
-The goal of the exercise should be defined in terms of **prediction quality** (RMSE is not appropriate here.)  
-
----
-
-# Comments on the Forecasting Exercise
-
-Lasso seems extremely fit to answer tese types of questions, mostly because it is easy to interpert.  
-
-
-We can ask two interesting questions:
-
-- Does adding text-related indicators outpreform a naive model?  
-
-- Which indicators (or inteactions) are good predictors?  
-
-
-This framework can easily be extended to test for predictability in other types of response variables (e.g., the exchange rate)
+&lt;midd-blockquote&gt;"The most important user input in parametric topic models is the number of topics. There is no right answer to the appropriate number of topics. More topics will give more fine-grained representations of the data at the potential cost of being less precisely estimated."&lt;/midd-blockquote&gt;
 
 
 ---
 
-class: inverse, center, middle
+# The Distrubution of Topics Across Documents is Informative
+
+&lt;img src="index_files/figure-html/unnamed-chunk-18-1..svg" style="display: block; margin: auto;" /&gt;
+---
+
+class: title-slide-section-blue, center, middle
+
+# One Paper One Idea
+
+---
+
+# Which Way to Go?
+
+- In my view, the paper's main contributions are  
+  
+  1. Generating a rich, international text-related data sets.
+  2. Providing evidence on interest rate predictability.
+  3. Provide novel measures for transparency.
+
+- Unfortunately, these contributions are currently presented as "Applications".  
+
+- I recommend highlighting results and data rather than methodologies.
+
+- One idea, one paper: I think the authors must choose between forecasting and transparency.
+---
+
+# Redefining the Forecasting Exercise
+
+The forecasting exercise can be formulated as a **multi-task learning** problem, e.g., 
+
+`$$\mbox{Pr}(Y_t=k|X_{t-1}=x)=\frac{e^{\beta_{0k}+\beta_k^Tx}}{\sum_{\ell=1}^Ke^{\beta_{0\ell}+\beta_\ell^Tx}}.$$`
+
+where `\(Y_t\)` is the direction of change in the interest rate
+`$$k\in\{\text{increase,no-change,decrease}\},$$`  
+
+and `\(X_{t-1}\)` is a vector of predetermined features which includes a battery of text-related indicators, as well as other economic and financial variables and __interactions__ terms.  
+
+IMPORTANT: The goal should be defined in terms of **prediction quality** and not `\(p\)`-values or `\(R^2\)`.  
+
+---
+
+# Regularized Multinomial Logit
+
+The Lasso seems extremely fit to answer these types of questions, mostly because it is easy to interpret.  
+
+Multinomial Lasso model can be easily estimated using the __glmnet__ package, e.g.,
+
+
+```r
+library(glmnet)
+
+fit = glmnet(X, Y, family = "multinomial", type.multinomial = "grouped")
+```
+
+
+This will hopefully enable us to answer interesting questions such as:
+
+  - Does adding text-related indicators __outpreform__ a naive model?  
+  
+  - Which indicators (or interactions) __matter__ for prediction?  
+  
+  - Are there __cross-country__ effects?
+
+
+This framework can easily extend itself to predict other response variables (exchange rates, the yield curve, etc.).
+
+CAVEAT: Temporal dependence.
+
+---
+
+class: title-slide-section-blue, center, middle
 
 # Miscellaneous
 
 ---
 
-# Minor Comments
+# A Few More Suggestions
 
-- Provide an RMarkdown version of the document  
+- Provide an RMarkdown version of the methodological document.  
 
-- Avoid using word clouds  
+- Add more part-of-speech features using the [**cleanNLP**](https://statsmaths.github.io/cleanNLP/) R package.
 
-- Check robustness w.r.t `stemDocument`
+- Check robustness w.r.t `stemDocument`.
+
+- Avoid word clouds.
+
+- Refer to Gentzkow, M., Kelly, B. T., &amp; Taddy, M. (2017). Text as data (No. w23276). National Bureau of Economic Research.
+
+- Sentiment and topics as dependent variables? (Hansen, _et al._ 2017, QJE).
+
 
 ---
 
@@ -483,86 +516,113 @@ class: inverse, center, middle
 
 # Thanks!
 
-Comments?
-
 [&lt;i class="fa fa-paper-plane"&gt;&lt;/i&gt; ](mailto:caspi.itamar@gmail.com) caspi.itamar@gmail.com \|
 [&lt;i class="fa fa-github"&gt;&lt;/i&gt; ](https://github.com/itamarcaspi/) github.com/itamarcaspi  
 
 
+.footnote[
+Prepared using [RMarkdown](https://rmarkdown.rstudio.com/) and [xaringan](https://github.com/yihui/xaringan). The source code of this presentation can be found [here](https://github.com/itamarcaspi/text_mining). 
+]
+&lt;!-- --- --&gt;
 
----
+&lt;!-- # Appendix --&gt;
 
-# Appendix
+&lt;!-- --- --&gt;
 
----
+&lt;!-- # Which Words Contribute to Which Topics? --&gt;
 
-# Cleaning the Text
+&lt;!-- ```{r , eval= FALSE, echo=FALSE, fig.width=10, fig.height=6, fig.align='center'} --&gt;
+&lt;!-- # devtools::install_github('dgrtwo/drlib') --&gt;
+&lt;!-- library(drlib) --&gt;
 
-The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc.
+&lt;!-- td_beta &lt;- tidy(topic_model) --&gt;
 
+&lt;!-- td_beta %&gt;% --&gt;
+&lt;!--     group_by(topic) %&gt;% --&gt;
+&lt;!--     top_n(10, beta) %&gt;% --&gt;
+&lt;!--     ungroup() %&gt;% --&gt;
+&lt;!--     mutate(topic = paste0("Topic ", topic), --&gt;
+&lt;!--            term = reorder_within(term, beta, topic)) %&gt;% --&gt;
+&lt;!--     ggplot(aes(term, beta, fill = as.factor(topic))) + --&gt;
+&lt;!--     geom_col(alpha = 0.8, show.legend = FALSE) + --&gt;
+&lt;!--     facet_wrap(~ topic, scales = "free_y") + --&gt;
+&lt;!--     coord_flip() + --&gt;
+&lt;!--     scale_x_reordered() + --&gt;
+&lt;!--     labs(x = NULL, y = expression(beta)) + --&gt;
+&lt;!--     theme_minimal() --&gt;
 
-```r
-minutes_corpus &lt;- Corpus(VectorSource(minutes_pdf)) %&gt;% 
-  tm_map(removeWords, stopwords("english")) %&gt;% 
-  tm_map(removeNumbers) %&gt;% 
-  tm_map(removePunctuation) %&gt;% 
-  tm_map(stripWhitespace)  
-  # tm_map(stemDocument)
-```
-
-Now we convert the list to a term document matrix 
-
-
-```r
-minutes_dtm &lt;- minutes_corpus %&gt;% 
-  TermDocumentMatrix()
-
-minutes_dtm
-```
-
----
-
-
-
-```r
-minutes_keep &lt;- minutes_pdf %&gt;% 
-  as_tibble() %&gt;% 
-  mutate(is_keep = ifelse(str_detect(value, "decided to keep"), 1, 0)) %&gt;% 
-  select(is_keep) %&gt;% 
-  mutate(document = row_number())
-
-df &lt;- minutes_pdf %&gt;% 
-  as_tibble() %&gt;% 
-  mutate(document = row_number()) %&gt;% 
-  mutate(value = str_split(value,"\r\n")) %&gt;% 
-  rename(line = value) %&gt;% 
-  left_join(minutes_dates) %&gt;% 
-  left_join(minutes_keep) %&gt;% 
-  unnest(line)
-```
+&lt;!-- ``` --&gt;
 
 
-```r
-library(rsample)
+&lt;!-- --- --&gt;
+&lt;!-- # Cleaning the Text --&gt;
 
-minutes_split &lt;- df %&gt;%
-  select(document) %&gt;%
-  initial_split()
-train_data &lt;- training(minutes_split)
-test_data &lt;- testing(minutes_split)
-```
+&lt;!-- The **tm** package enables us to "clean" the text - transform to lowercase letters, remove stop words and punctuation, etc. --&gt;
+
+&lt;!-- ```{r, eval=FALSE} --&gt;
+&lt;!-- minutes_corpus &lt;- Corpus(VectorSource(minutes_pdf)) %&gt;%  --&gt;
+&lt;!--   tm_map(removeWords, stopwords("english")) %&gt;%  --&gt;
+&lt;!--   tm_map(removeNumbers) %&gt;%  --&gt;
+&lt;!--   tm_map(removePunctuation) %&gt;%  --&gt;
+&lt;!--   tm_map(stripWhitespace)   --&gt;
+&lt;!--   # tm_map(stemDocument) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- Now we convert the list to a term document matrix  --&gt;
+
+&lt;!-- ```{r, eval=FALSE} --&gt;
+&lt;!-- minutes_dtm &lt;- minutes_corpus %&gt;%  --&gt;
+&lt;!--   TermDocumentMatrix() --&gt;
+
+&lt;!-- minutes_dtm --&gt;
+&lt;!-- ``` --&gt;
+
+&lt;!-- --- --&gt;
+&lt;!-- # LASSO --&gt;
+
+&lt;!-- ```{r, eval=FALSE} --&gt;
+
+&lt;!-- minutes_keep &lt;- minutes_pdf %&gt;%  --&gt;
+&lt;!--   as_tibble() %&gt;%  --&gt;
+&lt;!--   mutate(is_keep = ifelse(str_detect(value, "decided to keep"), 1, 0)) %&gt;%  --&gt;
+&lt;!--   select(is_keep) %&gt;%  --&gt;
+&lt;!--   mutate(document = row_number()) --&gt;
+
+&lt;!-- df &lt;- minutes_pdf %&gt;%  --&gt;
+&lt;!--   as_tibble() %&gt;%  --&gt;
+&lt;!--   mutate(document = row_number()) %&gt;%  --&gt;
+&lt;!--   mutate(value = str_split(value,"\r\n")) %&gt;%  --&gt;
+&lt;!--   rename(line = value) %&gt;%  --&gt;
+&lt;!--   left_join(minutes_dates) %&gt;%  --&gt;
+&lt;!--   left_join(minutes_keep) %&gt;%  --&gt;
+&lt;!--   unnest(line) --&gt;
+
+&lt;!-- ``` --&gt;
+
+&lt;!-- ```{r, eval=FALSE} --&gt;
+
+&lt;!-- library(rsample) --&gt;
+
+&lt;!-- minutes_split &lt;- df %&gt;% --&gt;
+&lt;!--   select(document) %&gt;% --&gt;
+&lt;!--   initial_split() --&gt;
+&lt;!-- train_data &lt;- training(minutes_split) --&gt;
+&lt;!-- test_data &lt;- testing(minutes_split) --&gt;
+
+&lt;!-- ``` --&gt;
 
 
+&lt;!-- ```{r, eval=FALSE} --&gt;
 
-```r
-sparse_words &lt;- tidy_minutes %&gt;%
-  count(document, word) %&gt;%
-  inner_join(train_data) %&gt;%
-  cast_sparse(document, word, n)
+&lt;!-- sparse_words &lt;- tidy_minutes %&gt;% --&gt;
+&lt;!--   count(document, word) %&gt;% --&gt;
+&lt;!--   inner_join(train_data) %&gt;% --&gt;
+&lt;!--   cast_sparse(document, word, n) --&gt;
 
-class(sparse_words)
-dim(sparse_words)
-```
+&lt;!-- class(sparse_words) --&gt;
+&lt;!-- dim(sparse_words) --&gt;
+&lt;!-- ``` --&gt;
     </textarea>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script>var slideshow = remark.create({
