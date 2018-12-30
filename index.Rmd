@@ -52,7 +52,7 @@ These papers
   
   - bring attention to an important and relatively new tool.
   
-  - assemble a novel dataset on international central bank announcments.
+  - assemble a novel dataset on international central bank announcements.
   
   - present many interesting insights which relate to monetary policy.
 
@@ -70,7 +70,7 @@ These papers
 
 --
 
-- Focus on a specific application (Forecasting or Transparency).
+- Focus on a __specific__ application (Forecasting or Transparency).
 
 ---
 
@@ -375,17 +375,17 @@ class: title-slide-section-blue, center, middle
 
 # Which Way to Go?
 
-- In my view, the paper's main contributions are  
+- In my view, the paper has three contribution
   
-  1. Generating a rich, international data sets on central bank announcments.
-  2. Providing evidence on interest rate predictability.
-  3. Provide novel measures for transparency.
+  1. Generates a rich, international data sets on central bank announcements.
+  2. Provides evidence on interest rate predictability.
+  3. Suggests novel measures for transparency.
 
-- Unfortunately, these contributions are currently presented as "Applications".  
+- Unfortunately, the latter two are currently presented as "Applications".  
 
 - I recommend highlighting results and data rather than methodologies.
 
-- One idea, one paper: I think the authors must choose between forecasting and transparency indicators.
+- __One idea, one paper__: I think the authors must choose between forecasting and transparency indicators.
 ---
 
 # Redefining the Forecasting Exercise
