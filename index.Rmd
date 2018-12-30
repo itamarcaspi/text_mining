@@ -46,11 +46,15 @@ htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 
 # My Take 
 
-- A great pedagogical service to the research department.
+These papers
 
-- Brings attention to an important and relatively new tool.
-
-- Presents (too) many interesting insights.
+  - provide a great pedagogical service to the research department.
+  
+  - bring attention to an important and relatively new tool.
+  
+  - assemble a novel dataset on international central bank announcments.
+  
+  - present many interesting insights which relate to monetary policy.
 
 
 ---
@@ -66,7 +70,7 @@ htmltools::tagList(rmarkdown::html_dependency_font_awesome())
 
 --
 
-- Focus on a specific application (Forecasting or Transparency)
+- Focus on a specific application (Forecasting or Transparency).
 
 ---
 
@@ -81,7 +85,7 @@ include_graphics("https://3c1703fe8d.site.internapcdn.net/newman/gfx/news/hires/
 
 # Issues with Reproducability
 
-At current state, it is hard replicate the results in the paper since  
+At current state, it is hard replicate the results in the paper since it is hard to tell  
 
 --
 
@@ -93,7 +97,7 @@ At current state, it is hard replicate the results in the paper since
 
 --
 
-- The code to reproduce many of the figures in the text is missing.  
+- What is the code to used to produce some of the figures in the text?  
 
 ---
 
@@ -115,7 +119,7 @@ theme_set(theme_light())  # set default theme for all plots
 
 ---
 
-# Getting Data from the Web
+# How to Get Data from the Web
 
 The data are the raw material for this document, yet the document does not make it clear how to get them. It might be helpful to show how we can download some text using the **rvest** package and convert it to text using the **pdftools** package:
 
@@ -141,7 +145,7 @@ minutes_url <- pdf_urls %>%
 PROBLEM: Minutes links don't have a well defined URL pattern. This makes it hard to loop over the entire archive.
 
 ---
-# Get Data from Files
+# How to Get Data from Files
 
 Alternatively, users can pre-download the PDF files prior the analysis and convert them to text files using the **pdftools** package.  
 
@@ -164,7 +168,7 @@ minutes_pdf <- pdf_files %>%
 
 ---
 
-# Get Document Dates
+# How to Get Document Dates
 
 The PDF files include information about their date of creation. We can use this to create a tibble with dates for every document
  
@@ -373,7 +377,7 @@ class: title-slide-section-blue, center, middle
 
 - In my view, the paper's main contributions are  
   
-  1. Generating a rich, international text-related data sets.
+  1. Generating a rich, international data sets on central bank announcments.
   2. Providing evidence on interest rate predictability.
   3. Provide novel measures for transparency.
 
@@ -381,7 +385,7 @@ class: title-slide-section-blue, center, middle
 
 - I recommend highlighting results and data rather than methodologies.
 
-- One idea, one paper: I think the authors must choose between forecasting and transparency.
+- One idea, one paper: I think the authors must choose between forecasting and transparency indicators.
 ---
 
 # Redefining the Forecasting Exercise
@@ -440,7 +444,7 @@ class: title-slide-section-blue, center, middle
 
 - Add more part-of-speech features using the [**cleanNLP**](https://statsmaths.github.io/cleanNLP/) R package.
 
-- Check robustness w.r.t `stemDocument`.
+- Check robustness w.r.t `stemDocument` and `stopWords`.
 
 - Avoid word clouds.
 

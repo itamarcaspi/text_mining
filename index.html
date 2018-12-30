@@ -17,7 +17,7 @@ class: center, middle, inverse, title-slide
 # Discussion of “Text Mining Methodologies with R”
 ## By Benchimol, Kazinnik, and Saadon
 ### Itamar Caspi
-### Bank of Israel <br> December 30, 2018 (updated: 2018-12-29)
+### Bank of Israel <br> December 30, 2018 (updated: 2018-12-30)
 
 ---
 
@@ -37,11 +37,15 @@ class: center, middle, inverse, title-slide
 
 # My Take 
 
-- A great pedagogical service to the research department.
+These papers
 
-- Brings attention to an important and relatively new tool.
-
-- Presents (too) many interesting insights.
+  - provide a great pedagogical service to the research department.
+  
+  - bring attention to an important and relatively new tool.
+  
+  - assemble a novel dataset on international central bank announcments.
+  
+  - present many interesting insights which relate to monetary policy.
 
 
 ---
@@ -57,7 +61,7 @@ class: center, middle, inverse, title-slide
 
 --
 
-- Focus on a specific application (Forecasting or Transparency)
+- Focus on a specific application (Forecasting or Transparency).
 
 ---
 
@@ -70,7 +74,7 @@ class: title-slide-section-blue, center, middle
 
 # Issues with Reproducability
 
-At current state, it is hard replicate the results in the paper since  
+At current state, it is hard replicate the results in the paper since it is hard to tell  
 
 --
 
@@ -82,7 +86,7 @@ At current state, it is hard replicate the results in the paper since
 
 --
 
-- The code to reproduce many of the figures in the text is missing.  
+- What is the code to used to produce some of the figures in the text?  
 
 ---
 
@@ -101,7 +105,7 @@ library(tidyverse)  # for wrangling date and visualization
 
 ---
 
-# Getting Data from the Web
+# How to Get Data from the Web
 
 The data are the raw material for this document, yet the document does not make it clear how to get them. It might be helpful to show how we can download some text using the **rvest** package and convert it to text using the **pdftools** package:
 
@@ -127,7 +131,7 @@ minutes_url &lt;- pdf_urls %&gt;%
 PROBLEM: Minutes links don't have a well defined URL pattern. This makes it hard to loop over the entire archive.
 
 ---
-# Get Data from Files
+# How to Get Data from Files
 
 Alternatively, users can pre-download the PDF files prior the analysis and convert them to text files using the **pdftools** package.  
 
@@ -151,7 +155,7 @@ minutes_pdf &lt;- pdf_files %&gt;%
 
 ---
 
-# Get Document Dates
+# How to Get Document Dates
 
 The PDF files include information about their date of creation. We can use this to create a tibble with dates for every document
  
@@ -434,7 +438,7 @@ class: title-slide-section-blue, center, middle
 
 - In my view, the paper's main contributions are  
   
-  1. Generating a rich, international text-related data sets.
+  1. Generating a rich, international data sets on central bank announcments.
   2. Providing evidence on interest rate predictability.
   3. Provide novel measures for transparency.
 
@@ -442,7 +446,7 @@ class: title-slide-section-blue, center, middle
 
 - I recommend highlighting results and data rather than methodologies.
 
-- One idea, one paper: I think the authors must choose between forecasting and transparency.
+- One idea, one paper: I think the authors must choose between forecasting and transparency indicators.
 ---
 
 # Redefining the Forecasting Exercise
@@ -501,7 +505,7 @@ class: title-slide-section-blue, center, middle
 
 - Add more part-of-speech features using the [**cleanNLP**](https://statsmaths.github.io/cleanNLP/) R package.
 
-- Check robustness w.r.t `stemDocument`.
+- Check robustness w.r.t `stemDocument` and `stopWords`.
 
 - Avoid word clouds.
 
