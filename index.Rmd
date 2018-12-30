@@ -1,8 +1,8 @@
 ---
-title: "Discussion of \"Text Mining Methodologies with R\""
-subtitle: "By Benchimol, Kazinnik, and Saadon"
+title: "Discussion of"
+subtitle: "\"Communication and Transparency through Central Banks Texts\" <br/>__and__<br/>\"Text Mining Methodologies with R\"<br/>__by__<br/>Benchimol, Kazinnik, and Saadon"
 author: "Itamar Caspi"
-date: "Bank of Israel <br> December 30, 2018 (updated: `r Sys.Date()`)"
+date: "Bank of Israel  <br/> December 30, 2018 (updated: `r Sys.Date()`)"
 output:
   xaringan::moon_reader:
     css: [default, "style/middlebury.css", "style/middlebury-fonts.css"]
